@@ -41,168 +41,156 @@ npm run build
 yarn build
 ```
 
-## Описание даных
+# Описание даных
 
-# Слой Модели (Model)
+## Слой Модели (Model)
 
-1. Класс ProductModel
+### 1. Класс ProductModel
 
-Назначение: Управление данными от товарах  и взаимодействие с API товаров
+**Назначение:** Управление данными от товарах  и взаимодействие с API товаров
 
-Конструктор:
+*Конструктор:*
 
 - apiClient: ApiClient - клиент для работы с API
 - eventEmitter: EventEmitter - брокер событий
 
-Поля:
+*Поля:*
 
 - products: Product[] - массив товаров
 - currentProduct: Product | null - текущий выбранный товар
 - isLoading: boolean - флаг загрузки данных
 
-Методы:
+*Методы:*
 
 - loadProducts(): Promise<void> - загружает товары с API
 - getProductById(id: string): Product | undefined - возвращает товар по ID
 - setCurrentProduct(id: string): void - устанавливает текущий товар
 
-////////////////////////////
+### 2. Класс CartModel
 
-2. Класс CartModel
+**Назначение:** Управление корзиной покупок
 
-Назначение: Управление корзиной покупок
-
-Конструктор:
+*Конструктор:*
 
 - eventEmitter: EventEmitter - брокер событий
 
-Поля: 
+*Поля:*
 
 - items: CartItem[] - массив товаров в корзине
 - totalPrice: number - общая стоимость товаров
 - totalCount: number - общее количество товаров
 
-Методы: 
+*Методы:* 
 
 - addItem(product: Product): void - добавляет товар в корзину
 - removeItem(productId: string): void - удаляет товар из корзины
 - clearCart(): void - очищает корзину
 - calculateTotals(): void - пересчитывает итоговые значения
 
-///////////////////////////
+### 3. Класс OrderModel
 
-3. Класс OrderModel
+**Назначение:** Оформление заказов
 
-Назначение: Оформление заказов
-
-Конструктор:
+*Конструктор:*
 
 - apiClient: ApiClient - клиент для работы с API
 - eventEmitter: EventEmitter - брокер событий
 
-Поля:
+*Поля:*
 
 - currentOrder: order | null - текущий оформляемый заказ
 - deliveryAddress: string - адрес доставки
 - paymentMethod: Online | UponReceipt - способ оплаты
 - custormerContacts: CustomerContacts - контакты покупателя
 
-Методы:
+*Методы:*
 
 - createOrder(cart: CartItem[]): Promise<Order> - создает новый заказ
 - validateDeliveryData(): boolean - проверяет данные доставки
 - validateCustomerDate(): boolean - проверяет контактные данные
 
-# Слой Представления (View)
+## Слой Представления (View)
 
-1. Класс ProductListView
+### 1. Класс ProductListView
 
-Назначение: Отображение каталога товаров
+**Назначение:** Отображение каталога товаров
 
-Конструктор:
+*Конструктор:*
 
 - container: HTMLElement - контейнер для рендеринга
 - eventEmitter: EventEmitter - брокер событий
 
-Элементы:
+*Элементы:*
 
 - productCards: NodeList - карточки товаров
 - cartButton: HTMLElement - кнопка корзины
 
-Методы:
+*Методы:*
 
 - render(products: Product[]): void - отрысовывает список товаров
-- showLoading(): void - показывает индикатор загрузки
-- hideLoading(): void - скрывает индикатор загрузки
+  
+### 2. Класс ProductModalView
 
-///////////////////////////
+**Назначение:** Отображение модального окна с деталями товара
 
-2. Класс ProductModalView
-
-Назначение: Отображение модального окна с деталями товара
-
-Конструктор:
+*Конструктор:*
 
 - modalElement: HTMLElement - элемент модального окна
 - eventEmitter: EventEmitter - брокер событий
 
-Элементы:
+*Элементы:*
 
 - closeButten: HTMLElement - кнопка закрытия
 - addToCartButten: HTMLElement - кнопка "Добавить в корзину"
 
-Методы:
+*Методы:*
 
 - show(product: Product): void - показывает модальное окно
 - hide(): void - скрывает модальное окно
 - updateCartButtons(isInCart: boolean): void - обновляет состояние кнопок корзины
 
-//////////////////////////
+### 3. Класс CartView
 
-3. Класс CartView
+**Назначение:** Отображение корзины покупок
 
-Назначение: Отображение корзины покупок
-
-Конструктор:
+*Конструктор:*
 
 - container: HTMLElement - контейнер для рендеринга
 - eventEmitter: EventEmitter - брокер событий
 
-Элементы:
+*Элементы:*
 
 - itemsList: HTMLElement - список товаров
 - totalElement: HTMLElement - элемент с общей суммой
 - checkoutButton: HTMLElement - кнопка оформления заказа
 
-Методы:
+*Методы:*
 
 - render(cartData: CartData): void - отрисовывает корзину
 - toggleCheckoutButton(enable: boolean): void - активирует/деактивирует кнопку оформления
 
-//////////////////////////
+### 4. Класс CheckoutView
 
-4. Класс CheckoutView
+**Назначение:** Отображение процесса оформления заказа
 
-Назначение: Отображение процесса оформления заказа
-
-Конструктор:
+*Конструктор:*
 
 - container: HTMLElement - контейнер для рендеринга
 - eventEmitter: EventEmitter - брокер событий
 
-Элементы:
+*Элементы:*
 
 - deliveryForm: HTMLFormElement - форма доставки
 - paymentForm: HTMLFormElement - форма оплаты
 - nextStepButton: HTMLElement - кнопка следующего шага
 - submitButton: HTMLElement - кнопка подтверждения заказа
 
-Методы: 
+*Методы:*
 
 - renderStep1(): void - отрисовывает первый шаг оформления
 - renderStep2(): void - отрисовывает второй шаг оформления
 - showCuccess(): void - показывает сообщение об успешном заказе
 
-# Слой Презентера
+## Слой Презентера
 
-Презентер будет реализован в основном скрипте приложения и будет координировать взаимодействие между моделями и представлениями через брокер событий
+Презентер будет реализован в основном скрипте приложения и будет координировать взаимодействие между моделями и представлениями через брокер событийÍ

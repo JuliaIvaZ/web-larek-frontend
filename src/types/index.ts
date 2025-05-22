@@ -106,75 +106,96 @@ interface IApiClient {
 
 // Интерфейсы моделей
 
+// Модель товаров
+// управляет данными о товарах: загрузкой, поиском, текущим выбранным товаром
 interface IProductModel {
-    getProducts(): Product[];
-    getProductById(id: string): Product | undefined;
-    setCurrentProduct(id: string): void;
+    getProducts(): Product[];                           // возвращает массив уже загруженных и преобразованных в 
+                                                        // Product товаров при открытии главной страницы, при успешной загрузке данных с сервера
+    getProductById(id: string): Product | undefined;    // возвращает товар по его ID
+    setCurrentProduct(id: string): void;                // устанавливает текущий выбранный товар (например, для отображения
+                                                        // в модальном окне)
 }
 
+// Модель корзины
+// управляет товарами в корзине: добавлением, удалением, подсчетом итогового количества и цены
 interface ICartModel {
     items: CartItem[];
     totalPrice: number;
     totalCount: number;
-    addItem(product: Product): void;
-    removeitem(productid: string): void;
-    clear(): void;
+    addItem(product: Product): void;           // добавляет товар в корзину
+                                               // Логика: проверяет, есть ли товар в items. Ессли нет, 
+                                               // то добавляет новый СardItem и обновляет totalCount и totalPrice
+    removeitem(productid: string): void;       // удаляет товар из корзины по ID
+    clear(): void;                             // полностью очищает корзину после оформления заказа
 }
 
+// Модель заказа
+// отвечает за оформление заказа и валидацию данных
 interface IOrderModel {
-    createOrder(cart: CartItem[]): Promise<Order>;
-    validateDeliveryData(): boolean;
-    validateCustomerData(): boolean;
+    createOrder(cart: CartItem[]): Promise<Order>;  // отправляет данные заказа на сервер 
+                                                    // и возвращает объект Order c ID и статусом заказа
+    validateDeliveryData(): boolean;                // Проверяет, заполнены ли обязательные поля доставки адрес и способ оплаты
+    validateCustomerData(): boolean;                // Проверяет, заполнены ли обязательные поля контактов email и телефон
 }
 
 // Интерфейсы представлений
 
+// Интерфейс для списка товаров,
+// отвечает за отображение каталога товаров на главной странице
 interface IProductListView {
-    render(products: Product[]): void;
-    showLoading(): void;
-    hideLoading(): void;
+    render(products: Product[]): void;      // отрисовывает список товаров на основе переданных данных
 }
 
+// Интерфейс моадльного окна товара
+// отвечает за отображение подробной информации о товаре и взаимодействие с корзиной
 interface IProductModalView {
-    show(product: Product): void;
-    hide(): void;
-    updateCartButtons(isInCart: boolean): void;
+    show(product: Product): void;                   // открывает модальное окно с информацией о товаре
+    hide(): void;                                   // закрывает модально окно при клике на крестик или вне окна 
 }
 
+// Представление корзины
+// отвечает за отображение корзины и кнопки оформления заказа
 interface ICartView {
-    render(cartData: CartData): void;
-    toggleCheckoutButton(enable: boolean): void;
+    render(cartData: CartData): void;               // перерисовывает корзину на основе переданных данных
+                                                    // вызывается при открытии корзины и после добавления/удаления товара
+    toggleCheckoutButton(enable: boolean): void;    // активирует/деактивирует кнопку оформления заказа
 }
 
+// Представление оформления заказа
+// управляет отображением шагов оформления заказа и результата
 interface ICheckoutView {
-    renderStep1(): void;
-    renderStep2(): void;
-    showSuccess(): void;
+    renderStep1(): void;    // показывает первый шаг оформления (форма ввода адреса доставки и выбор способа оплаты)
+    renderStep2(): void;    // открывает второй шаг (форма ввода контактных данных и кнопка подтверждения заказа)
+    showSuccess(): void;    // показывает сообщение об успешном оформлении заказа и очищает корзину
 }
 
 // События 
 
+// Перечисление событий
+// Список всех возможных событий, сгруппированных по функциональности
 enum AppEvents {
     // Товары
-    PRODUCTS_LOADED = 'products:loaded',
-    PRODUCT_SELECTED = 'product:selected',
+    PRODUCTS_LOADED = 'products:loaded',                // Товары загружены (передается массив Product[])
+    PRODUCT_SELECTED = 'product:selected',              // Пользователь выбрал товар (передается Product)
 
     // Корзина
-    CART_ITEM_ADDED = 'caart:item-added',
-    CART_ITEM_REMOVED = 'cart:item-removed',
-    CART_UPDATED = 'cart:updated',
+    CART_ITEM_ADDED = 'cart:item-added',                // Товар добавлен в корзину 
+    CART_ITEM_REMOVED = 'cart:item-removed',            // Товар удален из корзины 
+    CART_UPDATED = 'cart:updated',                      // Состояние корзины изменилось (передается CartData)
 
     // Заказ
-    ORDER_STARTED = 'order:started',
-    ORDER_STEP1_COMPLETED = 'order:step1-completed',
-    ORDER_STEP2_COMPLETED = 'order:step2-completed',
-    ORDER_COMPLETED = 'order:completed',
+    ORDER_STARTED = 'order:started',                    // Пользователь начал оформление заказа
+    ORDER_STEP1_COMPLETED = 'order:step1-completed',    // Пользователь заполнил адрес доставки и способ оплаты (завершен первый шаг)
+    ORDER_STEP2_COMPLETED = 'order:step2-completed',    // Пользователь заполнил контактные данные (завершен второй шаг)
+    ORDER_COMPLETED = 'order:completed',                // Заказ оформлен (передается Order)
 
     // UI события
-    MODAL_OPENED = 'ui:modal-opened',
-    MODAL_CLOSED = 'ui:modal-closed'
+    MODAL_OPENED = 'ui:modal-opened',                   // Открыто модальное окно (передается Product)
+    MODAL_CLOSED = 'ui:modal-closed'                    // Закрыто модальное окно
 }
 
+// Типы данных событий
+// Связывает событие с типом передаваемых данных
 interface EventMap {
     [AppEvents.PRODUCTS_LOADED]: { products: Product[]};
     [AppEvents.PRODUCT_SELECTED]: { product: Product};
@@ -184,8 +205,9 @@ interface EventMap {
     [AppEvents.MODAL_CLOSED]: { product: Product };
 }
 
+// Определяет методы для работы с событиями
 interface IEventEmitter {
-    on<T extends AppEvents>(event: T, callback: (data: EventMap[T]) => void): void;
-    off<T extends AppEvents>(event: T, callback: (data: EventMap[T]) => void): void;
-    emit<T extends AppEvents>(event: T, data: EventMap[T]): void;
+    on<T extends AppEvents>(event: T, callback: (data: EventMap[T]) => void): void;     // Подписывает на событие
+    off<T extends AppEvents>(event: T, callback: (data: EventMap[T]) => void): void;    // Отписывает от события
+    emit<T extends AppEvents>(event: T, data: EventMap[T]): void;                       // Генерирует событие
 }
