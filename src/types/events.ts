@@ -1,10 +1,10 @@
-import { Product, CartData, Order } from "./index";  
+import { Product, CartData, Order } from "./models";  
 
 // События 
 
 // Перечисление событий
 // Список всех возможных событий, сгруппированных по функциональности
-export enum AppEvents {
+enum AppEvents {
     // Товары
     PRODUCTS_LOADED = 'products:loaded',                // Товары загружены (передается массив Product[])
     PRODUCT_SELECTED = 'product:selected',              // Пользователь выбрал товар (передается Product)
@@ -27,7 +27,7 @@ export enum AppEvents {
 
 // Типы данных событий
 // Связывает событие с типом передаваемых данных
-export type EventMap = {
+type EventMap = {
     [AppEvents.PRODUCTS_LOADED]: { products: Product[]};
     [AppEvents.PRODUCT_SELECTED]: { product: Product};
     [AppEvents.CART_ITEM_ADDED]: { productId: string };
@@ -47,8 +47,10 @@ type _ApproveEventEntry = {
 }
 
 // Определяет методы для работы с событиями
-export interface IEventEmitter {
+interface IEventEmitter {
     on<T extends AppEvents>(event: T, callback: (data: EventMap[T]) => void): void;     // Подписывает на событие
     off<T extends AppEvents>(event: T, callback: (data: EventMap[T]) => void): void;    // Отписывает от события
     emit<T extends AppEvents>(event: T, data: EventMap[T]): void;                       // Генерирует событие
 }
+
+export { AppEvents, IEventEmitter, EventMap }
