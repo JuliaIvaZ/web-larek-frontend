@@ -43,6 +43,144 @@ yarn build
 
 # Описание даных
 
+## Интерфейсы
+
+### Типы данных приложения
+
+*Товар в приложении*
+Product
+
+- id - идентификационный номер товара
+- title - название товара
+- description - описание товара
+- imageURL - ссылка на картинку товара
+- category - категория товара
+- price - цена
+
+*Категории товаров*
+ProductCategory - может принимать значения 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
+
+*Элемент корзины*
+CartItem
+
+- product - собственно товар
+- totalPrice - суммарная стоимость товаров в корзине
+
+*Состояние корзины*
+СartData
+
+- items
+-  totalPrice
+-  totalCount
+  
+*Способы оплаты*
+PaymentMethod - может принимать только два значения 'online' | 'then'
+
+*Контакты покупателя*
+CustomerContacts - так как поля обязательные, валидация проверяется в OrderModel
+
+- email
+- phone
+
+*Оформленный заказ*
+Order - Создается в OrderModel при оформлении, отправляется на сервер (преобразуется в ApiOrder), обратно получаем id заказа
+
+- id
+- item
+- paymentMethod
+- castomerContact
+- total
+- status
+
+### Типы данных API
+
+ApiProduct - получаем с сервера при загрузке каталога товаров, затем в ProductModel преобразуем в локальный тип Product
+
+- id
+- title
+- description
+- image
+- category
+- price
+
+*Элемент корзины с сервера*
+ApiCartItem - в CartModel преобразуем в локальный тип CartItem
+
+- productId
+- priceSnapshot - цена на момент добавления товара
+
+*Данные заказа с сервера*
+ApiOrder - данные, которые отправляются на сервер при оформлении
+
+- id
+- item
+- deliveryAddress
+- paymentMethod
+- customerContacts
+- total
+- status
+
+*Интерфейс API-клиента*
+IApiClient - описывает возможные API-запросы, их параметры и возвращаемые данные
+
+- getProducts - получение списка товаров. На выходе получаем массив ApiProducts
+- getProductById - получение конкретного товара по его id
+- addToCart - добавление товара в корзину. На выходе получаем ApiCartItem
+- removeFromCart - удаление товара из корзины
+- createOrder - создание заказа. На выходе получаем ApiOrder
+
+### Интерфейсы моделей
+
+*Модель товара*
+IProductModel - управляет данными о товарах: загрузкой, поиском, текущем выбранным товаром
+
+- getProducts() - возвращает массив уже загруженных и преобразованных в Product товаров при открытии главной страницы при успешной загрузке данных с сервера
+- getProductById(id) - возвращает товар по его ID 
+- setCurrentProduct(id) - устанавливает текущий выбранный товар, например, для отображения в модальном окне
+
+*Модель корзины*
+ICartModel - управляет товарами в корзине: добавлением, удалением, подсчетом итогового количества и цены
+
+- items - содержит массив элементов корзины CartItem
+- totalPrice
+- totalCount
+- addItem - проверяет, есть ли товар в items, если нет - добавляет новый CartItem и обновляет totalCount и totalPrice. На вход получает product
+- removeItem - удаляет товар из корзины. На вход получает product
+- clear - полностью очищает корзину после оформления заказа
+
+*Модель заказа*
+IOrderModel - отвечает за оформление заказа и валидацию данных
+
+- createOrder - имеет на входе массив товаров в корзине CartItem отпавляет данные заказа на сервер и возвращает объект Order с id и статусом заказа
+- validateDeliveryData - проверяет заполненность обязательных полей доставки (адрес и способ оплаты)
+- validateCustomerData - проверяет заполненность обязательных полей контактов (email и телефон)
+
+### Интерфейсы представлений
+
+*Интерфейс для списка товаров*
+IProductListView - отвечает за отображение каталога товаров на главной странице
+
+- render - отрисовывает список товаров Products на основе переданных данных
+
+*Интефрейс модального окна товара*
+IProductModalView - отвечает за отображение подробной информации о товаре и взаимодействие с корзиной
+
+- show - открывает модальное окно с информацией о товаре
+- hide - закрывает модальное окно при клике на крестик или вне окна
+
+*Представление корзины*
+ICartView - отвечает за отображение корзины и кнопки оформления заказа
+
+- render - перерисовывает корзину на основе данных cardData, вызывается при открытии корзины и после добавления/удаления товара
+- toggleCheckOutButton - активирует/деактивирует кнопку оформления заказа
+
+*Представление оформления заказа*
+ICheckoutView - управляет отображением шагов оформления заказа и результата
+
+- renderStep1 - показывает первый шаг оформления - форма ввода адреса доставки и выбор способа оплаты
+- renderStep2 - показывает второй шаг оформления - форма ввода контактных данных и кнопка подтверждения заказа
+- showSuccess - показывает сообщение об успешном оформлении заказа и очищает корзину
+
 ## Слой Модели (Model)
 
 ### 1. Класс ProductModel
@@ -78,7 +216,6 @@ yarn build
 
 - items: CartItem[] - массив товаров в корзине
 - totalPrice: number - общая стоимость товаров
-- totalCount: number - общее количество товаров
 
 *Методы:* 
 
@@ -105,7 +242,7 @@ yarn build
 
 *Методы:*
 
-- createOrder(cart: CartItem[]): Promise<Order> - создает новый заказ
+- createOrder(cart: CartItem[], totalPrice: number): Promise<Order> - создает новый заказ
 - validateDeliveryData(): boolean - проверяет данные доставки
 - validateCustomerDate(): boolean - проверяет контактные данные
 
@@ -122,16 +259,16 @@ yarn build
 
 *Элементы:*
 
-- productCards: NodeList - карточки товаров
+- productCards: HTMLElement - элемент разметки, отображающий список товаров
 - cartButton: HTMLElement - кнопка корзины
 
 *Методы:*
 
-- render(products: Product[]): void - отрысовывает список товаров
+- render(elementsList: HTMLElements[]): void - отрысовывает список товаров
   
-### 2. Класс ProductModalView
+### 2. Класс ModalView
 
-**Назначение:** Отображение модального окна с деталями товара
+**Назначение:** Отображение универсального модального окна
 
 *Конструктор:*
 
@@ -140,56 +277,93 @@ yarn build
 
 *Элементы:*
 
-- closeButten: HTMLElement - кнопка закрытия
-- addToCartButten: HTMLElement - кнопка "Добавить в корзину"
+- closeButton: HTMLElement - кнопка закрытия
 
 *Методы:*
 
-- show(product: Product): void - показывает модальное окно
+- show(content: HTMLElement): void - открывает модальное окно
 - hide(): void - скрывает модальное окно
-- updateCartButtons(isInCart: boolean): void - обновляет состояние кнопок корзины
 
-### 3. Класс CartView
+### 3. Класс ProductView
+
+**Назначение:** Отображение карточки товара
+
+*Конструктор:*
+
+- eventEmitter: EventEmitter - брокер событий
+
+*Элементы:*
+
+- rootElement: HTMLElement - контейнер карточки товара
+- addToCartButton: HTMLElement - кнопка добавления товара в корзину
+
+*Методы:*
+
+- getContentElement(): HTMLElement - возвращает элемент разметки для передачи в модальное окно
+- render(product: Product) - отрисовывает данные товара
+  
+### 4. Класс CartView
 
 **Назначение:** Отображение корзины покупок
 
 *Конструктор:*
 
-- container: HTMLElement - контейнер для рендеринга
 - eventEmitter: EventEmitter - брокер событий
 
 *Элементы:*
 
+- rootElement: HTMLElement - контейнер корзины
 - itemsList: HTMLElement - список товаров
 - totalElement: HTMLElement - элемент с общей суммой
 - checkoutButton: HTMLElement - кнопка оформления заказа
 
 *Методы:*
 
+- getContentElement(): HTMLElemtnt - возвращает DOM-элемент корзины для передачи в модальное окно
 - render(cartData: CartData): void - отрисовывает корзину
 - toggleCheckoutButton(enable: boolean): void - активирует/деактивирует кнопку оформления
+- totalPrice(): number - считает общую сумму заказа
 
-### 4. Класс CheckoutView
+### 5. Класс CheckoutViewStep1
 
-**Назначение:** Отображение процесса оформления заказа
+**Назначение:** Отображение первого шага процесса оформления заказа
 
 *Конструктор:*
 
-- container: HTMLElement - контейнер для рендеринга
 - eventEmitter: EventEmitter - брокер событий
 
 *Элементы:*
 
+- rootElement: HTMLElement - контейнер первого шага оформления заказа
 - deliveryForm: HTMLFormElement - форма доставки
 - paymentForm: HTMLFormElement - форма оплаты
 - nextStepButton: HTMLElement - кнопка следующего шага
-- submitButton: HTMLElement - кнопка подтверждения заказа
 
 *Методы:*
 
-- renderStep1(): void - отрисовывает первый шаг оформления
-- renderStep2(): void - отрисовывает второй шаг оформления
-- showCuccess(): void - показывает сообщение об успешном заказе
+- getContentElement(): HTMLElement - возвращает DOM-элемент первого шага оформления заказа для передачи в модальное окно
+- render(): void - отрисовывает первый шаг оформления
+
+### 6. Класс CheckoutViewStep2
+
+**Назначение:** Отображение второго шага процесса оформления заказа
+
+*Конструктор:*
+
+- eventEmitter: EventEmitter - брокер событий
+
+*Элементы:*
+
+- rootElement: HTMLElement - контейнер второго шага оформления заказа
+- emailForm: HTMLFormElement - форма ввода email
+- phoneNumberForm: HTMLFormElement - форма ввода номера телефона
+- submitButton: HTMLElement - кнопка завершения заказа
+
+*Методы:*
+
+- getContentElement(): HTMLElement - возвращает DOM-элемент первого шага оформления заказа для передачи в модальное окно
+- render(): void - отрисовывает второй шаг оформления
+
 
 ## Слой Презентера
 

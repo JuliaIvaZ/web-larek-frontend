@@ -4,31 +4,47 @@ import { CartData, Product } from "./models";
 // Интерфейс для списка товаров,
 // отвечает за отображение каталога товаров на главной странице
 interface IProductListView {
-    render(products: Product[]): void;      // отрисовывает список товаров на основе переданных данных
+    render(elementsList: HTMLElement[]): void;      // отрисовывает список товаров на основе переданных данных
+                                                    // В презентере создается список ХТМЛЭлементов из 
+                                                    // представлений и передается в рендер
 }
 
-// Интерфейс моадльного окна товара
-// отвечает за отображение подробной информации о товаре и взаимодействие с корзиной
-interface IProductModalView {
-    show(product: Product): void;                   // открывает модальное окно с информацией о товаре
+// Интерфейс моадльного окна
+interface IModalView {
+    show(content: HTMLElement): void;               // открывает модальное окно
     hide(): void;                                   // закрывает модально окно при клике на крестик или вне окна 
+}
+
+// Интерфейс отображения информации о товаре
+interface IProductView {
+    getContentElement(): HTMLElement;               // возвращает элемент страницы
+    render(product: Product): void;                 // отрисовывает товар на основе переданных данных
 }
 
 // Представление корзины
 // отвечает за отображение корзины и кнопки оформления заказа
 interface ICartView {
-    render(cartData: CartData): void;               // перерисовывает корзину на основе переданных данных
+    getContentElement(): HTMLElement;               // возвращает корзину
+    render(cartData: CartData): void;               // отрисовывает корзину на основе переданных данных
                                                     // вызывается при открытии корзины и после добавления/удаления товара
+                                                    // Работает так же, как в IProductListView
     toggleCheckoutButton(enable: boolean): void;    // активирует/деактивирует кнопку оформления заказа
+    totalPrice(): number;                           // возвращает общую стоимость товаров в корзине
 }
 
 // Представление оформления заказа
-// управляет отображением шагов оформления заказа и результата
-interface ICheckoutView {
-    renderStep1(): void;    // показывает первый шаг оформления (форма ввода адреса доставки и выбор способа оплаты)
-    renderStep2(): void;    // открывает второй шаг (форма ввода контактных данных и кнопка подтверждения заказа)
-    showSuccess(): void;    // показывает сообщение об успешном оформлении заказа и очищает корзину
+// управляет отображением первого шага оформления заказа
+interface ICheckoutViewStep1 {
+    getContentElement(): HTMLElement;               // возвращает элемент страницы
+    render(): void;                                 // показывает первый шаг оформления (форма ввода адреса доставки и выбор способа оплаты)
 }
 
-export { IProductListView, IProductModalView, ICartView, ICheckoutView };
+// Представление оформления заказа
+// управляет отображением второго шага оформления заказа
+interface ICheckoutViewStep2 {
+    getContentElement(): HTMLElement;               // возвращает элемент страницы
+    render(): void;                                 // показывает первый шаг оформления (форма ввода емейла и номера телефона)
+}
+
+export { IProductListView, IModalView, IProductView, ICartView, ICheckoutViewStep1, ICheckoutViewStep2 };
 

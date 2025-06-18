@@ -23,7 +23,6 @@ interface CartItem {
 interface CartData {
     items: CartItem[];
     totalPrice: number;
-    totalCount: number;
 }
 
 // Способы оплаты
@@ -69,14 +68,14 @@ interface ICartModel {
     addItem(product: Product): void;           // добавляет товар в корзину
                                                // Логика: проверяет, есть ли товар в items. Ессли нет, 
                                                // то добавляет новый СardItem и обновляет totalCount и totalPrice
-    removeitem(productid: string): void;       // удаляет товар из корзины по ID
+    removeItem(productid: string): void;       // удаляет товар из корзины по ID
     clear(): void;                             // полностью очищает корзину после оформления заказа
 }
 
 // Модель заказа
 // отвечает за оформление заказа и валидацию данных
 interface IOrderModel {
-    createOrder(cart: CartItem[]): Promise<Order>;  // отправляет данные заказа на сервер 
+    createOrder(cart: CartItem[], totalPrice: number): Promise<Order>;  // отправляет данные заказа на сервер 
                                                     // и возвращает объект Order c ID и статусом заказа
     validateDeliveryData(): boolean;                // Проверяет, заполнены ли обязательные поля доставки адрес и способ оплаты
     validateCustomerData(): boolean;                // Проверяет, заполнены ли обязательные поля контактов email и телефон
