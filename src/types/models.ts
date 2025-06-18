@@ -64,7 +64,6 @@ interface IProductModel {
 interface ICartModel {
     items: CartItem[];
     totalPrice: number;
-    totalCount: number;
     addItem(product: Product): void;           // добавляет товар в корзину
                                                // Логика: проверяет, есть ли товар в items. Ессли нет, 
                                                // то добавляет новый СardItem и обновляет totalCount и totalPrice

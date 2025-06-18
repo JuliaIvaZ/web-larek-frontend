@@ -4,20 +4,14 @@ import { CartData, Product } from "./models";
 // Интерфейс для списка товаров,
 // отвечает за отображение каталога товаров на главной странице
 interface IProductListView {
-    render(elementsList: HTMLElement[]): void;      // отрисовывает список товаров на основе переданных данных
+    render(products: Product[]): void;      // отрисовывает список товаров на основе переданных данных
                                                     // В презентере создается список ХТМЛЭлементов из 
                                                     // представлений и передается в рендер
 }
 
-// Интерфейс моадльного окна
-interface IModalView {
-    show(content: HTMLElement): void;               // открывает модальное окно
-    hide(): void;                                   // закрывает модально окно при клике на крестик или вне окна 
-}
-
 // Интерфейс отображения информации о товаре
 interface IProductView {
-    getContentElement(): HTMLElement;               // возвращает элемент страницы
+    getContentElement(): HTMLElement;               // возвращает элемент разметки страницы
     render(product: Product): void;                 // отрисовывает товар на основе переданных данных
 }
 
@@ -44,6 +38,12 @@ interface ICheckoutViewStep1 {
 interface ICheckoutViewStep2 {
     getContentElement(): HTMLElement;               // возвращает элемент страницы
     render(): void;                                 // показывает первый шаг оформления (форма ввода емейла и номера телефона)
+}
+
+// Интерфейс модального окна
+interface IModalView {
+    showModal(content: HTMLElement): void;               // открывает модальное окно
+    hideModal(): void;                                   // закрывает модально окно при клике на крестик или вне окна 
 }
 
 export { IProductListView, IModalView, IProductView, ICartView, ICheckoutViewStep1, ICheckoutViewStep2 };
