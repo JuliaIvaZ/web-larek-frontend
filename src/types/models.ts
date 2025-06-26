@@ -1,7 +1,7 @@
 // Типы данных приложения (внутренние типы приложения)
 
 // Категории товаров
-type ProductCategory = 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
+export type ProductCategory = 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
 
 // Товар в приложении
 interface Product {
@@ -57,6 +57,7 @@ interface IProductModel {
     getProductById(id: string): Product | undefined;    // возвращает товар по его ID
     setCurrentProduct(id: string): void;                // устанавливает текущий выбранный товар (например, для отображения
                                                         // в модальном окне)
+    setProducts(products: Product[]): void;              // устанавливает массив товаров
 }
 
 // Модель корзины

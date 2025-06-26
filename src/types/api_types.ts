@@ -1,4 +1,7 @@
+import { ProductCategory } from "../types/models";
 // Типы данных API
+
+
 
 // Получаем с сервера при загрузке каталога товаров,
 // в ProductModel преобразуем в локальный тип Product

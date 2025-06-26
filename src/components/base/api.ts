@@ -1,3 +1,5 @@
+import { API_URL } from "../../utils/constants";
+
 export type ApiListResponse<Type> = {
     total: number,
     items: Type[]
@@ -9,7 +11,7 @@ export class Api {
     readonly baseUrl: string;
     protected options: RequestInit;
 
-    constructor(baseUrl: string, options: RequestInit = {}) {
+    constructor(baseUrl: string = API_URL, options: RequestInit = {}) {
         this.baseUrl = baseUrl;
         this.options = {
             headers: {
