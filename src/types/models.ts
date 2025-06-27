@@ -126,4 +126,12 @@ interface IOrderModel {
     validateCustomerData(): boolean;                // Проверяет, заполнены ли обязательные поля контактов email и телефон
 }
 
+export interface ICard {
+    readonly id: string;
+    readonly container: HTMLElement;
+    readonly inCart: boolean;
+    setInCart(value: boolean): void;
+    render(data?: Partial<IProduct>): HTMLElement;
+}
+
 export { IProduct, ICartItem, ICartData, ICustomerContacts, IOrder, IProductModel, ICartModel, IOrderModel };
