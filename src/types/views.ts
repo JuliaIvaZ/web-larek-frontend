@@ -1,10 +1,10 @@
-import { CartData, Product } from "./models";
+import { ICartData, IProduct } from "./models";
 // Интерфейсы представлений
 
 // Интерфейс для списка товаров,
 // отвечает за отображение каталога товаров на главной странице
 interface IProductListView {
-    render(products: Product[]): void;      // отрисовывает список товаров на основе переданных данных
+    render(products: IProduct[]): void;      // отрисовывает список товаров на основе переданных данных
                                                     // В презентере создается список ХТМЛЭлементов из 
                                                     // представлений и передается в рендер
 }
@@ -12,14 +12,14 @@ interface IProductListView {
 // Интерфейс отображения информации о товаре
 interface IProductView {
     getContentElement(): HTMLElement;               // возвращает элемент разметки страницы
-    render(product: Product): void;                 // отрисовывает товар на основе переданных данных
+    render(product: IProduct): void;                 // отрисовывает товар на основе переданных данных
 }
 
 // Представление корзины
 // отвечает за отображение корзины и кнопки оформления заказа
 interface ICartView {
     getContentElement(): HTMLElement;               // возвращает корзину
-    render(cartData: CartData): void;               // отрисовывает корзину на основе переданных данных
+    render(cartData: ICartData): void;               // отрисовывает корзину на основе переданных данных
                                                     // вызывается при открытии корзины и после добавления/удаления товара
                                                     // Работает так же, как в IProductListView
     toggleCheckoutButton(enable: boolean): void;    // активирует/деактивирует кнопку оформления заказа

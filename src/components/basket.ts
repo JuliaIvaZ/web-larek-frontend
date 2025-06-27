@@ -1,25 +1,25 @@
-import { Product } from "../types/models";
+import { IProduct } from "../types/models";
 import { IEvents } from "./base/events";
 
 export class DataBasket {
-    private products: Product[] = [];
+    private products: IProduct[] = [];
     private eventsHub: IEvents
 
     constructor(eventsHub: IEvents) {
     this.eventsHub = eventsHub
      }
 
-    addProduct(product: Product): void {
+    addProduct(product: IProduct): void {
     this.products.push(product);
     this.eventsHub.emit('basket:changed');
      }
 
-    removeProduct(product: Product): void {
+    removeProduct(product: IProduct): void {
     this.products = this.products.filter(p => p.id !== product.id);
     this.eventsHub.emit('basket:changed');
      }
 
-    getProductById(id: string): Product | undefined {
+    getProductById(id: string): IProduct | undefined {
     return this.products.find((p) => p.id === id);
      }
 
@@ -27,7 +27,7 @@ export class DataBasket {
     return this.products.length;
      }
 
-    get all(): Product[] {
+    get all(): IProduct[] {
     return [...this.products];
      }
 }

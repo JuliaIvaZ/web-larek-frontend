@@ -1,4 +1,4 @@
-import { Product, CartData, Order } from "./models";  
+import { IProduct, ICartData, IOrder } from "./models";  
 
 // События 
 
@@ -28,16 +28,16 @@ enum AppEvents {
 // Типы данных событий
 // Связывает событие с типом передаваемых данных
 type EventMap = {
-    [AppEvents.PRODUCTS_LOADED]: { products: Product[]};
-    [AppEvents.PRODUCT_SELECTED]: { product: Product};
+    [AppEvents.PRODUCTS_LOADED]: { products: IProduct[]};
+    [AppEvents.PRODUCT_SELECTED]: { product: IProduct};
     [AppEvents.CART_ITEM_ADDED]: { productId: string };
     [AppEvents.CART_ITEM_REMOVED]: { productId: string };
-    [AppEvents.CART_UPDATED]: { cart: CartData };
+    [AppEvents.CART_UPDATED]: { cart: ICartData };
     [AppEvents.ORDER_STARTED]: undefined;
     [AppEvents.ORDER_STEP1_COMPLETED]: { deliveryAddress: string, paymentMethod: string };
     [AppEvents.ORDER_STEP2_COMPLETED]: { email: string, phone: string };
-    [AppEvents.ORDER_COMPLETED]: { order: Order};
-    [AppEvents.MODAL_OPENED]: { product: Product };
+    [AppEvents.ORDER_COMPLETED]: { order: IOrder};
+    [AppEvents.MODAL_OPENED]: { product: IProduct };
     [AppEvents.MODAL_CLOSED]: undefined;
 }
 
