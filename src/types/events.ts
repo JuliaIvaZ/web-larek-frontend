@@ -1,4 +1,4 @@
-import { IProduct, ICartData, IOrder } from "./models";  
+import { IProduct, ICartData, IOrder } from "./app.types";  
 
 // События 
 

@@ -1,6 +1,4 @@
 //import { IEvents } from './events';
-
-
 // Базовый компонент
 // От него наследуются все остальные представления
 export abstract class Component<T> {

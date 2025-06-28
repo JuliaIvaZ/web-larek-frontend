@@ -1,19 +1,14 @@
-import { ApiClient } from "./base/api";
-import { ICard, IProduct,ProductModel } from "../types/models";
-import { CatalogView, ModalView } from "./appData";
-import { EventEmitter } from "./base/events";
-import { CDN_URL, API_URL } from "../utils/constants";
-import { Component } from "./base/component";
-import { cloneTemplate, ensureElement } from "../utils/utils";
-import { CartModel } from "./cartModel";
+import { IProduct } from "../types/app.types";
+import { ICard } from "../types/views.types";
+import { API_URL, CDN_URL } from "../utils/constants";
+import { ApiClient } from "./core/api";
+import { EventEmitter } from "./core/EventEmitter";
+import { CartModel, ProductModel } from "./model/AppModel";
+import { CatalogView, ModalView, ProductModal } from "./view/Modal";
 
 export class App {
-    private cart: IProduct[] = [];
-
     private modalView: ModalView;
-    private productModal: ProductModal;
     private modalTemplate: HTMLTemplateElement;
-
     private apiClient: ApiClient;
     private productModel: ProductModel;
     private catalogView: CatalogView;
@@ -22,282 +17,142 @@ export class App {
     private cartModel: CartModel;
     private productCards: ICard[] = [];
 
-    private setPageLock(state: boolean): void {
-        const pageWrapper = document.querySelector('.page__wrapper');
-        if (pageWrapper) {
-            pageWrapper.classList.toggle('page__wrapper_locked', state);
+    constructor() {
+        try {
+            // 1. Проверяем обязательные элементы перед инициализацией
+            this.checkTemplates();
+            
+            // 2. Инициализация сервисов
+            this.events = new EventEmitter();
+            this.apiClient = new ApiClient(CDN_URL, API_URL);
+            this.productModel = new ProductModel(this.apiClient);
+            this.cartModel = new CartModel(this.events);
+
+            // 3. Инициализация представлений с безопасными проверками
+            this.initViews();
+
+            this.setupEventListeners();
+            
+            // 4. Запуск приложения
+            this.init().catch(console.error);
+            
+        } catch (error) {
+            console.error('Ошибка инициализации приложения:', error);
         }
     }
-    
-    constructor() {
-        this.events = new EventEmitter();
-        this.apiClient = new ApiClient(CDN_URL, API_URL);
-        this.productModel = new ProductModel(this.apiClient);
-        this.catalogView = new CatalogView(
-            document.querySelector('.page__wrapper') as HTMLElement,
-            this.events
-        );
 
-        this.init();
-
-        this.modalView = new ModalView(
-            ensureElement<HTMLElement>('#modal-container'), 
-            this.events
-        );
+    private checkTemplates() {
+        const requiredTemplates = [
+            '#card-catalog',
+            '#card-preview'
+        ];
         
-        this.modalTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
-        
-        this.events.on('modal:opened', () => this.setPageLock(true));
-        this.events.on('modal:closed', () => this.setPageLock(false));
-        this.events.on('product:selected', (data: { product: IProduct }) => {
-            this.openProductModal(data.product);
-        });
-
-        this.cartModel = new CartModel(this.events);
-
-        this.events.on('cart:updated', (data: { cart: IProduct[] }) => {
-            console.log('Корзина обновлена:', data.cart);
-            this.updateCartCounter(data.cart.length);
-        });
-        
-        this.events.on('items:changed', () => {
-            this.updateProductsState();
-        });
-        
-    }
-
-    private updateProductsState(): void {
-        this.productCards.forEach(card => {
-            card.setInCart(this.cartModel.hasItem(card.id));
-        });
-    }
-
-    private createProductCard(product: IProduct): HTMLElement {
-        const template = ensureElement<HTMLTemplateElement>('#card-catalog');
-        const cardElement = cloneTemplate<HTMLElement>(template);
-
-        const card = new Card(cardElement, this.cartModel.hasItem(product.id), {
-            onClick: () => {
-                this.cartModel.addItem(product);
+        requiredTemplates.forEach(id => {
+            if (!document.querySelector(id)) {
+                throw new Error(`Не найден обязательный шаблон: ${id}`);
             }
         });
-
-        this.productCards.push(card);
-                
-        // Заполняем данные карточки
-        ensureElement<HTMLElement>('.card__title', cardElement).textContent = product.title;
-        ensureElement<HTMLImageElement>('.card__image', cardElement).src = product.imageUrl;
-        ensureElement<HTMLElement>('.card__price', cardElement).textContent = 
-            product.price ? `${product.price} синапсов` : 'Бесценно';
-
-        return cardElement;
     }
 
-    private openProductModal(product: IProduct): void {
-        const modalContent = cloneTemplate<HTMLElement>(this.modalTemplate);
-        const isInCart = this.cartModel.hasItem(product.id);
-        const modal = new ProductModal(modalContent, isInCart);
+    private initViews() {
+        // Галерея
+        const galleryContainer = document.querySelector('.gallery');
+        if (!galleryContainer) throw new Error('Не найден .gallery');
         
-        modal.render({ product });
-        this.modalView.open(modalContent);
+        this.catalogView = new CatalogView(
+            galleryContainer as HTMLElement,
+            this.events
+        );
 
-        // Обработчик кнопки "В корзину"
-        const button = ensureElement<HTMLButtonElement>('.card__button', modalContent);
-        button.addEventListener('click', () => {
-            this.addToCart(product);
-            this.modalView.close();
-        });
-
-        this.modalView.open(modalContent);
-    }
-
-    private addToCart(product: IProduct): void {
-        if (product.price === null) return;
+        // Модальное окно
+        const modalContainer = document.querySelector('#modal-container');
+        if (!modalContainer) throw new Error('Не найден #modal-container');
         
-        this.cart.push(product);
-        this.updateCartCounter(this.cart.length);
-        this.events.emit('cart:updated', { cart: this.cart });
+        this.modalView = new ModalView(
+            modalContainer as HTMLElement,
+            this.events
+        );
+
+        // Шаблон для модалки товара
+        this.modalTemplate = document.querySelector('#card-preview') as HTMLTemplateElement;
     }
 
     private async init() {
         try {
             await this.productModel.loadProducts();
-            this.catalogView.render(this.productModel.getProducts());
-
-         //   this.events.on('product:selected', (data: { product: IProduct }) => {
-         //       console.log('Выбран товар: ', data.product);
-         //   });
+            const products = this.productModel.getProducts();
+            
+            // Безопасный рендеринг
+            if (this.catalogView) {
+                this.catalogView.render(products);
+            } else {
+                console.error('CatalogView не инициализирован');
+            }
         } catch (error) {
-            console.error('Ошибка при инициализации приложения: ', error);
+            console.error('Ошибка загрузки товаров:', error);
         }
     }
-    private initModals() {
+
+    private setupEventListeners() {
+        // 1. Событие выбора товара
         this.events.on('product:selected', (data: { product: IProduct }) => {
             this.openProductModal(data.product);
         });
 
-        this.events.on('modal:closed', () => {
-            // Дополнительные действия при закрытии модального окна
+        // 2. События модального окна
+        this.events.on('modal:open', () => {
+            document.body.classList.add('page__wrapper_locked');
+        });
+
+        this.events.on('modal:close', () => {
+            document.body.classList.remove('page__wrapper_locked');
         });
     }
 
-    private updateCartCounter(count: number): void {
-        const counter = ensureElement<HTMLElement>('.header__basket-counter');
-        counter.textContent = String(count);
-    }
-}
+    private openProductModal(product: IProduct) {
+        try {
+            // 1. Клонируем шаблон
+            const modalContent = document.importNode(this.modalTemplate.content, true);
+            const modalElement = modalContent.firstElementChild as HTMLElement;
+            
+            if (!modalElement) {
+                throw new Error('Шаблон модального окна пустой');
+            }
 
-export class ProductModal extends Component<{ product: IProduct }> {
-    protected _description: HTMLElement;
-    protected _button: HTMLButtonElement;
-    protected _image: HTMLImageElement;
-    protected _title: HTMLElement;
-    protected _price: HTMLElement;
-    protected _category: HTMLElement;
+            // 2. Заполняем данные
+            this.fillModalContent(modalElement, product);
 
-    constructor(container: HTMLElement, private inCart: boolean) {
-        super(container);
-        
-        this._description = ensureElement<HTMLElement>('.card__text', container);
-        this._button = ensureElement<HTMLButtonElement>('.card__button', container);
-        this._image = ensureElement<HTMLImageElement>('.card__image', container);
-        this._title = ensureElement<HTMLElement>('.card__title', container);
-        this._price = ensureElement<HTMLElement>('.card__price', container);
-        this._category = ensureElement<HTMLElement>('.card__category', container);
-        
-    }
+            // 3. Показываем модальное окно
+            this.modalView.showModal(modalElement);
 
-    set isInCart(value: boolean) {
-        this._button.disabled = value || this._price === null;
-        this._button.textContent = value ? 'В корзине' : 'Купить';
-    }
-
-    render(data?: { product: IProduct }): HTMLElement {
-        if (!data?.product) return this.container;
-
-        const { product } = data;
-        //super.render(data);
-
-        //this._description.textContent = product.description;
-        //this._button.disabled = product.price === null;
-
-        //return this.container;
-        this._title.textContent = product.title;
-        this._description.textContent = product.description;
-        this._image.src = product.imageUrl;
-        this._image.alt = product.title;
-        
-        // Обработка цены
-        this._price.textContent = product.price ? `${product.price} синапсов` : 'Бесценно';
-        
-        // Обработка категории
-        const categoryClass = this.getCategoryClass(product.category);
-        this._category.textContent = product.category;
-        this._category.className = `card__category ${categoryClass}`;
-        
-        // Кнопка "В корзину"
-        this._button.disabled = product.price === null;
-        if (product.price === null) {
-            this._button.classList.add('button_disabled');
-        } else {
-            this._button.classList.remove('button_disabled');
+        } catch (error) {
+            console.error('Ошибка открытия модального окна:', error);
         }
-        return this.container;
     }
 
-    private getCategoryClass(category: string): string {
-        const map: Record<string, string> = {
-            'софт-скил': 'card__category_soft',
-            'хард-скил': 'card__category_hard',
-            'дополнительное': 'card__category_additional',
-            'кнопка': 'card__category_button',
-            'другое': 'card__category_other'
+    private fillModalContent(container: HTMLElement, product: IProduct) {
+        const setTextContent = (selector: string, value: string) => {
+            const el = container.querySelector(selector);
+            if (el) el.textContent = value;
         };
-        return map[category] || 'card__category_other';
+
+        setTextContent('.card__title', product.title);
+        setTextContent('.card__text', product.description || '');
+        setTextContent('.card__price', product.price ? `${product.price} синапсов` : 'Бесценно');
+
+        const img = container.querySelector('.card__image') as HTMLImageElement;
+        if (img) {
+            img.src = product.imageUrl;
+            img.alt = product.title;
+        }
+
+        const button = container.querySelector('.card__button');
+        if (button) {
+            button.addEventListener('click', () => {
+                this.cartModel.addItem(product);
+                this.modalView.close();
+            });
+        }
     }
 }
 
-
-
-interface ICardActions {
-    onClick: (event: MouseEvent) => void;
-}
-
-export class Card extends Component<IProduct> implements ICard {
-    protected _title: HTMLElement;
-    protected _image: HTMLImageElement;
-    protected _category: HTMLElement;
-    protected _price: HTMLElement;
-    protected _button: HTMLButtonElement;
-    protected _inCart: boolean;
-
-    constructor(
-        public readonly container: HTMLElement, // Делаем public readonly
-        inCart: boolean = false,
-        actions?: ICardActions
-    ) {
-        super(container);
-        
-        this._title = ensureElement<HTMLElement>('.card__title', container);
-        this._image = ensureElement<HTMLImageElement>('.card__image', container);
-        this._category = ensureElement<HTMLElement>('.card__category', container);
-        this._price = ensureElement<HTMLElement>('.card__price', container);
-        this._button = ensureElement<HTMLButtonElement>('.card__button', container);
-        this._inCart = inCart;
-
-        if (actions?.onClick) {
-            this._button.addEventListener('click', actions.onClick);
-        }
-    }
-
-    get id(): string {
-        return this.container.dataset.id || '';
-    }
-
-    get inCart(): boolean {
-        return this._inCart;
-    }
-
-    setInCart(value: boolean): void {
-        this._inCart = value;
-        this.updateButton();
-    }
-
-    private updateButton(): void {
-        this._button.disabled = this._inCart || !this._price.textContent?.includes('синапсов');
-        this._button.textContent = this._inCart ? 'В корзине' : 'Купить';
-    }
-
-    render(data?: Partial<IProduct>): HTMLElement {
-        if (!data) return this.container;
-
-        super.render(data);
-
-        if (data.id) this.container.dataset.id = data.id;
-        if (data.title) this._title.textContent = data.title;
-        if (data.imageUrl) this._image.src = data.imageUrl;
-        if (data.imageUrl) this._image.alt = data.title || 'Изображение товара';
-        if (data.category) {
-            this._category.textContent = data.category;
-            this._category.className = `card__category card__category_${this.getCategoryClass(data.category)}`;
-        }
-        if (data.price !== undefined) {
-            this._price.textContent = data.price ? `${data.price} синапсов` : 'Бесценно';
-        }
-
-        this.updateButton();
-
-        return this.container;
-    }
-
-    private getCategoryClass(category: string): string {
-        const map: Record<string, string> = {
-            'софт-скил': 'soft',
-            'хард-скил': 'hard',
-            'дополнительное': 'additional',
-            'кнопка': 'button',
-            'другое': 'other'
-        };
-        return map[category] || 'other';
-    }
-}

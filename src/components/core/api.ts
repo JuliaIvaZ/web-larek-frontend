@@ -1,5 +1,5 @@
 import { API_URL, FALLBACK_API_PRODUCTS } from "../../utils/constants";
-import { IApiCartItem, IApiClient, IApiOrder, IApiProduct } from "../../types/api_types";
+import { IApiCartItem, IApiClient, IApiOrder, IApiProduct } from "../../types/api.types";
 
 export type ApiListResponse<Product> = {
     total: number,
@@ -45,44 +45,39 @@ export class Api {
 };
 
 export class ApiClient implements IApiClient {
-    public readonly cdnUrl: string;
-    private readonly baseUrl: string;
-    private readonly useFallback: boolean;
+    readonly cdnUrl: string;
+    readonly baseUrl: string;
+    private useFallback: boolean;
 
     constructor(cdnUrl: string, baseUrl: string, useFallback: boolean = false) {
         this.cdnUrl = cdnUrl;
         this.baseUrl = baseUrl;
         this.useFallback = useFallback;
     }
-
-    convertImagePath(imageUrl: string): string {
-        if (!imageUrl) return '';
-        return `${this.cdnUrl}${imageUrl.replace('.svg', '.png')}`
+    removeFromCart(productId: string): Promise<void> {
+        throw new Error("Method not implemented.");
     }
 
     async getProducts(): Promise<IApiProduct[]> {
         if (this.useFallback) {
-            console.log('Используются резервные данные (сервер недоступен)');
+            console.log('Используются резервные данные');
             return FALLBACK_API_PRODUCTS.map(item => ({
                 ...item,
                 image: this.convertImagePath(item.image)
             }));
         }
 
-        try { 
+        try {
             const response = await fetch(`${this.baseUrl}/product`);
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
             const data = await response.json();
             return data.items.map((item: IApiProduct) => ({
                 ...item,
                 image: this.convertImagePath(item.image)
-            }))
-        }
-        catch (error) {
-            console.error('Ошибка при загрузке товаров ', error);
-            console.warn('Переключение на резервные данные');
+            }));
+        } catch (error) {
+            console.error('Ошибка загрузки товаров:', error);
             return FALLBACK_API_PRODUCTS.map(item => ({
                 ...item,
                 image: this.convertImagePath(item.image)
@@ -90,20 +85,33 @@ export class ApiClient implements IApiClient {
         }
     }
 
+    convertImagePath(imageUrl: string): string {
+        return imageUrl ? `${this.cdnUrl}${imageUrl.replace('.svg', '.png')}` : '';
+    }
+
+    // Остальные обязательные методы интерфейса
     async getProductById(id: string): Promise<IApiProduct> {
         const response = await fetch(`${this.baseUrl}/product/${id}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
     }
-    addToCart(productId: string): Promise<IApiCartItem> {
-        throw new Error("Method not implemented.");
+
+    async addToCart(productId: string): Promise<IApiCartItem> {
+        const response = await fetch(`${this.baseUrl}/cart`, {
+            method: 'POST',
+            body: JSON.stringify({ productId })
+        });
+        return response.json();
     }
-    removeFromCart(productId: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    createOrder(orderData: Omit<IApiOrder, "id" | "status">): Promise<IApiOrder> {
-        throw new Error("Method not implemented.");
+
+    async createOrder(orderData: Omit<IApiOrder, 'id' | 'status'>): Promise<IApiOrder> {
+        const response = await fetch(`${this.baseUrl}/order`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+        return response.json();
     }
 }

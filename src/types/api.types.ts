@@ -1,9 +1,8 @@
-import { ProductCategory } from "../types/models";
 // Типы данных API
 
 // Получаем с сервера при загрузке каталога товаров,
 // в ProductModel преобразуем в локальный тип Product
-interface IApiProduct {
+export interface IApiProduct {
     id: string;
     title: string;
     description: string;
@@ -14,14 +13,14 @@ interface IApiProduct {
 
 // Элемент корзины с сервера,
 // в CartModel преобразуем в локальный тип CartItem
-interface IApiCartItem {
+export interface IApiCartItem {
     productId: string;
     priceSnapshot: number; // цена на момент добавления
 }
 
 // Данные заказа с сервера, отправляются на сервер
 // при оформлении
-interface IApiOrder {
+export interface IApiOrder {
     id: string;                 // номер заказа
     item: IApiCartItem[];        // товары
     deliveryAddress: string;    // адрес
@@ -38,8 +37,9 @@ interface IApiOrder {
 // Используется для работы с сервером.
 // Описывает возможные API-запросы, их параметры и возвращаемые данные
 
-interface IApiClient {
+export interface IApiClient {
     readonly cdnUrl: string;
+    readonly baseUrl: string;
     convertImagePath(imageUrl: string): string;
 
     // 1. Получить список товаров
@@ -59,4 +59,3 @@ interface IApiClient {
 
 }
 
-export { IApiClient, IApiProduct, IApiCartItem, IApiOrder };

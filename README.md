@@ -15,6 +15,30 @@
 - src/utils/constants.ts — файл с константами
 - src/utils/utils.ts — файл с утилитами
 
+Обновленная структура проекта: 
+src/
+├── components/
+│    ├── types/          # Типизация 
+│    │   ├── api.types.ts
+│    │   ├── app.types.ts
+│    │   └── views.types.ts
+│    │
+│    ├── core/           # Базовые классы
+│    │   ├── Component.ts
+│    │   └── EventEmitter.ts
+│    │
+│    ├── model/          # Все модели 
+│    │   ├── AppModel.ts   # Product + Cart
+│    │   └── ApiService.ts   # API
+│    │
+│    ├── view/           # Компоненты 
+│    │   ├── Card.ts
+│    │   ├── Modal.ts
+│    │   └── Page.ts
+│    │
+│    └── app.ts          # Инициализация
+└── index.ts
+
 ## Установка и запуск
 Для установки и запуска проекта необходимо выполнить команды
 
