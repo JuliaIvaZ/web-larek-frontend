@@ -1,91 +1,128 @@
-// Типы данных приложения (внутренние типы приложения)
 import { IApiClient, IApiProduct } from "./api.types";
 
-// Категории товаров
-export type ProductCategory = 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
+export type ID = string;
 
-// Товар в приложении
-export interface IProduct extends Pick<IApiProduct, 'id' | 'title' | 'description'>{
+export type ProductCategory = 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
+// Приведено
+export interface IProductsList {
+    _items: IProduct[];
+}
+// Приведено
+export interface IProduct {
+    id: string;                     // id: ID; // сохраняется в preview IProductsList
+    title: string;
+    description: string;
     imageUrl: string;
     category: ProductCategory;
     price: number | null;
 }
 
-// Элемент корзины
-export interface ICartItem {
-    product: IProduct;
-    count?: number;
-}
-
-// Состояние корзины
-export interface ICartData {
-    items: ICartItem[];
-    totalPrice: number;
-}
-
-//Оформленный заказ. Создается в OrderModel при оформлении,
-// отправляется на сервер (преобразуется в ApiOrder),
-// получаем обратно с сервера id и  status????
-export interface IOrder {
-    id: string;
-    item: ICartItem[];
-    paymentMethod: PaymentMethod;
-    customerContacts: ICustomerContacts;
+// Приведено
+export interface IOrder { // данные, уходящие к серверу для оформления заказа
+    payment: string;        //payment: string;
+    email: string;
+    phone: string;
+    address: string;
     total: number;
-    status: string;
+    items: string[];
 }
 
-// Интерфейсы моделей
+// Приведено
+export interface IOrderRequest { // данные, уходящие к серверу для оформления заказа
+    payment: string;
+    email: string;
+    phone: string;
+    address: string;
+}
 
-// Модель товаров
-// управляет данными о товарах: загрузкой, поиском, текущим выбранным товаром
+// Приведено
+export type TCartItem = Pick<IProduct, 'id' | 'title' | 'price'>;
+
+// Приведено
+export type ValidationErrors = Partial<Record<keyof IOrderRequest, string>>;
+
+// Приведено
 export interface IProductModel {
-    getProducts(): IProduct[];                           // возвращает массив уже загруженных и преобразованных в 
-                                                        // Product товаров при открытии главной страницы, при успешной загрузке данных с сервера
-    getProductById(id: string): IProduct | undefined;    // возвращает товар по его ID
-    setCurrentProduct(id: string): void;                // устанавливает текущий выбранный товар (например, для отображения
-                                                        // в модальном окне)
-    setProducts(products: IProduct[]): void;              // устанавливает массив товаров
+    _items: IProduct[];
+    setItems(products: IProduct[]): void;    //setItems(productArray: IProduct[]): void;
+    getItems(): IProduct[];                  //getItems(): IProduct[];
+    getProduct(productId: string): IProduct | undefined;
 }
 
-// Модель корзины
-// управляет товарами в корзине: добавлением, удалением, подсчетом итогового количества и цены
+// Приведено
 export interface ICartModel {
-    items: ICartItem[];
-    totalPrice: number;
-    addItem(product: IProduct): void;           // добавляет товар в корзину
-                                               // Логика: проверяет, есть ли товар в items. Ессли нет, 
-                                               // то добавляет новый СardItem и обновляет totalCount и totalPrice
-    removeItem(productid: string): void;       // удаляет товар из корзины по ID
-    clear(): void;                             // полностью очищает корзину после оформления заказа
+    items: TCartItem[];
+    addProduct(product: IProduct): void;
+    removeProduct(productId: string): void;     //deleteProduct(productId: string): void;
+    clear(): void;
+    getCount(): number;
+    getTotal(): number;
+    hasProduct(productId: string): boolean;
 }
 
-// Модель заказа
-// отвечает за оформление заказа и валидацию данных
+// Приведено
 export interface IOrderModel {
-    createOrder(cart: ICartItem[], totalPrice: number): Promise<IOrder>;  // отправляет данные заказа на сервер 
-                                                    // и возвращает объект Order c ID и статусом заказа
-    validateDeliveryData(): boolean;                // Проверяет, заполнены ли обязательные поля доставки адрес и способ оплаты
-    validateCustomerData(): boolean;                // Проверяет, заполнены ли обязательные поля контактов email и телефон
+    order: IUserOrder;
+    validateOrder(): FormErrors;
+    initOrder(): void;
+    setOrderField(field: keyof IUserOrder, value: string): void;
 }
 
-export interface CartUpdateEvent {
-    items: IProduct[]; // Всегда используем items вместо cart
+// Приведено
+export interface IPaymentForm {
+    payment: string;
+    address: string;
 }
 
+// Приведено
+export interface IContactsForm {
+    email: string;
+    phone: string;
+}
 
+// Приведено
+export interface IOrderPayment extends IPaymentForm {
+    items: string[];
+}
 
+// Приведено
+export interface IOrderContacts extends IContactsForm {
+    items: string[];
+}
 
-
-
-
-
-// Способы оплаты
-export type PaymentMethod = 'online' | 'then';
-
-// Контакты покупателя. Так как поля обязательные, 
-// валидация проверяется в OrderModel
+// Приведено
+export interface ISuccessData {
+    id: string;                 // id: ID;
+    total: number;
+} 
+export type PaymentMethod = 'online' | 'cash';
 export interface ICustomerContacts {
     email: string;
     phone: string;
+}
+export type FormErrors = Partial<Record<keyof IUserOrder, string>>;
+interface IUserOrder {
+    payment: string;
+    email: string;
+    phone: string;
+    address: string;
+}
+
+export interface IOrderForm {
+    payment: string;
+    address: string;
+    email: string;
+    phone: string;
+    valid: boolean;
+    errors: string;
+}
+
+export interface ISuccessData {
+    total: number;
+}
+
+export interface ICurrentOrder {
+    address?: string;
+    paymentMethod?: PaymentMethod;
+    customerContacts?: ICustomerContacts;
 }

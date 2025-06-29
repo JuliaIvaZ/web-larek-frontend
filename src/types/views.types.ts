@@ -1,72 +1,67 @@
-import { ICartData, IProduct } from "./app.types";
-// Интерфейсы представлений
+import { IProduct } from "./app.types";
 
-export interface ICard {
-    readonly id: string;
-    readonly container: HTMLElement;
-    readonly isInCart: boolean;
-    setInCart(value: boolean): void;
-    render(data?: Partial<IProduct>): HTMLElement;
+// Приведено
+export interface ICard<T> {
+    id: string;                 // id: ID;
+    title: string;
+    price: number;
+    description?: string;
+    image?: string;
+    category?: string;
 }
 
-// Интерфейс модального окна
-export interface IModalView {
-    showModal(content: HTMLElement): void;               // открывает модальное окно
-    hideModal(): void;                                   // закрывает модально окно при клике на крестик или вне окна 
+// Приведено
+export interface ISuccessOrder {
+    total: number;
 }
 
-// Представление корзины
-// отвечает за отображение корзины и кнопки оформления заказа
+// Приведено
+export interface ISuccess {
+    onClick: () => void;
+}
+
+// Приведено
+export interface IModal {
+    content: HTMLElement;
+}
+
+// Приведено
+export interface IModalForm {
+    errors: string;
+    valid: boolean;
+}
+
+// Приведено
 export interface ICartView {
-    getContentElement(): HTMLElement;               // возвращает корзину
-    render(cartData: ICartData): void;               // отрисовывает корзину на основе переданных данных
-                                                    // вызывается при открытии корзины и после добавления/удаления товара
-                                                    // Работает так же, как в IProductListView
-    toggleCheckoutButton(enable: boolean): void;    // активирует/деактивирует кнопку оформления заказа
-    totalPrice(): number;                           // возвращает общую стоимость товаров в корзине
+    items: HTMLLIElement[];
+    totalPrice: HTMLSpanElement;
 }
 
-// Интерфейс отображения информации о товаре
+export interface IModalView {
+    showModal(content: HTMLElement): void;
+    hideModal(): void;
+}
+
+
 export interface IProductView {
-    getContentElement(): HTMLElement;               // возвращает элемент разметки страницы
-    render(product: IProduct): void;                 // отрисовывает товар на основе переданных данных
+    getContentElement(): HTMLElement;
+    render(product: IProduct): void;
 }
 
-// Интерфейс для списка товаров,
-// отвечает за отображение каталога товаров на главной странице
 export interface IProductListView {
-    render(products: IProduct[]): void;      // отрисовывает список товаров на основе переданных данных
-                                                    // В презентере создается список ХТМЛЭлементов из 
-                                                    // представлений и передается в рендер
+    render(products: IProduct[]): void;
 }
 
-// Представление оформления заказа
-// управляет отображением первого шага оформления заказа
 export interface ICheckoutViewStep1 {
-    getContentElement(): HTMLElement;               // возвращает элемент страницы
-    render(): void;                                 // показывает первый шаг оформления (форма ввода адреса доставки и выбор способа оплаты)
+    getContentElement(): HTMLElement;
+    render(): void;
 }
 
-// Представление оформления заказа
-// управляет отображением второго шага оформления заказа
 export interface ICheckoutViewStep2 {
-    getContentElement(): HTMLElement;               // возвращает элемент страницы
-    render(): void;                                 // показывает первый шаг оформления (форма ввода емейла и номера телефона)
+    getContentElement(): HTMLElement;
+    render(): void;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export interface ISuccessView {
+    render(data: { id: string; total: number }): HTMLElement;
+}

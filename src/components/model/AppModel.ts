@@ -1,73 +1,220 @@
-import { EventEmitter } from '../core/EventEmitter';
-import { IProduct, ProductCategory } from '../../types/app.types';
-import { IApiClient, IApiProduct } from '../../types/api.types';
-import { FALLBACK_API_PRODUCTS } from '../../utils/constants';
+import { ICartModel, ID, IOrderModel, IOrderRequest, IProduct, IProductModel, TCartItem, ValidationErrors } from "../../types/app.types";
+import { IEvents } from "../core/EventEmitter";
+import { ICard } from "../../types/views.types";
+import { Component } from "../core/Component";
+import { ensureElement } from "../../utils/utils";
 
-export class CartModel {
-    private items: IProduct[] = [];
-    private events: EventEmitter;
+// Приведено
+export class ProductCard<T> extends Component<ICard<T>> {
+    protected _id: ID;             
+    protected _title: HTMLHeadingElement;
+    protected _price: HTMLSpanElement;
+    protected _description?: HTMLParagraphElement;
+    protected _image?: HTMLImageElement;
+    protected _category?: HTMLSpanElement;
+    protected _button?: HTMLButtonElement;
 
-    constructor(events: EventEmitter) {
-        this.events = events;
+    constructor(container: HTMLElement) {
+        super(container);
+
+        this._title = ensureElement<HTMLHeadingElement>('.card__title', this.container);
+        this._price = ensureElement<HTMLSpanElement>('.card__price', this.container);
+        this._description = container.querySelector('.card__text');
+        this._image = container.querySelector('.card__image');
+        this._category = container.querySelector('.card__category');
     }
 
-    addItem(item: IProduct): void {
-        if (!this.hasItem(item.id)) {
-            this.items.push(item);
-            this.emitUpdate();
+    set id(value: ID) {
+        this.container.dataset.id = value;
+    }
+
+    get id(): string {
+        return this.container.dataset.id || '';
+    }
+
+    set title(value: string) {
+        this.setText(this._title, value);
+    }
+
+    set price(value: number) {
+        if (value !== null) {
+            this.setText(this._price, `${value} синапсов`);
+        } else {
+            this.setText(this._price, `0 синапсов`);
         }
+        
     }
 
-    removeItem(id: string): void {
-        this.items = this.items.filter(item => item.id !== id);
-        this.emitUpdate();
+    set description(value: string) {
+        this.setText(this._description, value);
     }
 
-    hasItem(id: string): boolean {
-        return this.items.some(item => item.id === id);
+    set image(value: string) {
+        this.setImage(this._image, value, this.title);
     }
 
-    private emitUpdate(): void {
-        this.events.emit('cart:updated', { 
-            items: [...this.items] 
-        });
+    get category(): string {
+        return this.container.dataset.category || '';
     }
 
-    getItems(): IProduct[] {
-        return [...this.items];
+    set category(value: string) {
+        this.setText(this._category, value);
     }
 }
 
-export class ProductModel {
-    private products: IProduct[] = [];
-    private dataSource: 'server' | 'fallback' = 'server';
+// Приведено
+export class CartModel implements ICartModel {
+    private _items: TCartItem[] = [];
+    protected events: IEvents;
+    
+    constructor(events: IEvents) {
+        this.events = events;
+    }
 
-    constructor(private apiClient: IApiClient) {}
+    // Метод получения всех товаров
+    get items(): TCartItem[] {
+        return this._items;
+    }
 
-    async loadProducts(): Promise<void> {
-        try {
-            const apiProducts = await this.apiClient.getProducts();
-            this.dataSource = apiProducts === FALLBACK_API_PRODUCTS ? 'fallback' : 'server';
-            this.products = apiProducts.map(this.convertToProduct);
-            console.log(`Загружено ${this.products.length} товаров`);
-        } catch (error) {
-            console.error('Ошибка загрузки товаров:', error);
-            throw error;
+    // Метод добавления товара в корзину
+    addProduct(product: TCartItem): void {
+        if (this.hasProduct(product.id)) {
+            console.log(`Товар с ID ${product.id} уже добавлен`);
+            return;
         }
+        
+        this._items.push(product);
+        this.events.emit('basket:added', product);
     }
 
-    private convertToProduct(apiProduct: IApiProduct): IProduct {
-        return {
-            id: apiProduct.id,
-            title: apiProduct.title,
-            description: apiProduct.description,
-            imageUrl: apiProduct.image,
-            category: apiProduct.category as ProductCategory,
-            price: apiProduct.price
+    // Метод удаления товара из корзины по ID
+    removeProduct(productId: string): void {
+        this._items = this.items.filter(item => item.id !== productId);
+        this.events.emit('basket:deleted');
+    }
+
+    // Метод очистки корзины
+    clear(): void {
+        this._items = [];
+        this.events.emit('basket:cleared');
+    }
+
+    // Метод получения количества товаров
+    getCount(): number {
+        return this.items.length;
+    }
+
+    // Метод подсчета общей суммы
+    getTotal(): number {
+        return this.items.reduce((total, item) => {
+            // Проверяем, что цена не null
+            return item.price !== null ? total + item.price : total;
+        }, 0);
+    }
+
+    // Метод проверки наличия товара в корзине
+    hasProduct(productId: string): boolean {
+        return this.items.some(item => item.id === productId);
+    }
+
+    getProductIds(): string[] {
+        return this.items.map(item => item.id);
+    }
+}
+
+// Приведено
+export class ProductModel implements IProductModel {
+    //     Класс отвечает за хранение карточек товаров.
+    // Конструктор класса принимает экземпляр брокера событий.
+    // В полях класса хранятся следующие данные:
+    _items: IProduct[] = [];
+    preview: string | null;
+    protected events: IEvents;
+
+    constructor(events: IEvents) {
+        this.events = events;
+    }
+
+    setItems(productArray: IProduct[]) {
+        this._items = productArray;
+        this.events.emit('productsList:loaded');
+    }
+
+    getItems() {
+        return this._items;
+    }
+
+    // Метод для получения карточки по ID
+    getProduct(id: string): IProduct | undefined {
+        return this._items.find(product => product.id === id);
+    }
+
+    setPreview(item: IProduct) {
+        this.preview = item.id;
+    }   
+}
+
+// Приведено
+export class UserModel implements IOrderModel {
+    protected events: IEvents;
+    order: IOrderRequest = {
+        email: '',
+        phone: '',
+        payment: null,
+        address: ''
+    };
+    formErrors: ValidationErrors = {};
+
+    constructor(order: IOrderRequest, events: IEvents) {
+        this.order = order;
+        this.events = events;
+    }
+
+    emitChanges(event: string, payload?: object) {
+        this.events.emit(event, payload ?? {});
+    }
+
+    get orderData(): IOrderRequest {
+        return this.order;
+    }
+
+    setOrderField(field: keyof IOrderRequest, value: string) {
+        this.order[field] = value;
+
+        this.emitChanges('order:changed', {field: field})
+    }
+
+    validateOrder() {
+        const errors: ValidationErrors = {};
+
+        if (!this.order.email) {
+            errors.email = 'Необходимо указать email';
+        }
+
+        if (!this.order.phone) {
+            errors.phone = 'Необходимо указать телефон';
+        }
+
+        if (!this.order.address) {
+            errors.address = 'Необходимо указать адрес';
+        }
+
+        if (!this.order.payment) {
+            errors.payment = 'Необходимо указать вид оплаты';
+        }
+
+        this.formErrors = errors;
+
+        return errors;
+    }
+
+    initOrder() {
+        this.order = {
+            payment: null,
+            email: '',
+            phone: '',
+            address: '',
         };
-    }
-
-    getProducts(): IProduct[] {
-        return [...this.products];
+        this.emitChanges('order:changed')
     }
 }
