@@ -41,6 +41,16 @@ export class CardForModal extends ProductCard<ICard<IProduct>> {
             this.setDisabled(this._button, true);
         }
     }
+    render(data: IProduct): HTMLElement {
+        super.render(data);
+        
+        // Если цена null ("Бесценно"), блокируем кнопку
+        if (data.price === null) {
+            this.setDisabled(this._button, true);
+        }
+        
+        return this.container;
+    }
 
     getContainer(): HTMLElement {
         return this.container;

@@ -75,7 +75,10 @@ export class App {
         this.orderPayment = new ModalPayment(cloneTemplate(this.orderPaymentTemplate), this.events);
         this.orderContacts = new ModalContacts(cloneTemplate(this.orderContactsTemplate), this.events);
         this.success = new SuccessOrder(cloneTemplate(this.successTemplate), {
-            onClick: () => this.events.emit('modal:close')
+            onClick: () => {
+                this.modal.close();
+                this.events.emit('modal:close')
+            }
         });
     }
 
@@ -112,6 +115,7 @@ export class App {
         this.page.catalog = this.productsData._items.map((card) => {
 
             const cardElement = cloneTemplate<HTMLElement>(this.galleryCardTemplate);
+
             const cardInstant = new Card(cardElement, {
                 onClick: () => this.events.emit('card:select', card)
             });
@@ -120,6 +124,7 @@ export class App {
 
         this.page.counter = 0;
     }
+
     // Открываем модалку с превью карточки
     private handleCardSelect(item: IProduct): void {
         const isInBasket =this.basketData.hasProduct(item.id);
@@ -128,12 +133,12 @@ export class App {
             cloneTemplate(this.previewCardTemplate),
             {
                 onClick: () => {
-                    if (!isInBasket) {
+                    if (!isInBasket && item.price !== null) {
                         this.events.emit('cardToBasket:add', item);
                     }
                 }
             },
-            isInBasket
+            isInBasket || item.price === null
         );
 
         previewCard.render(item);

@@ -31,15 +31,6 @@ export interface IApiSuccess {
     total: number;
 }
 
-//export interface IApiClient {
-//    readonly cdnUrl: string;
-//    readonly baseUrl: string;
-//    convertImagePath(imageUrl: string): string;
-//    getProducts(): Promise<IApiProduct[]>;
-//    getProductById(id: string): Promise<IApiProduct>;
-//    createOrder(orderData: Omit<IApiOrder, 'id' | 'status'>): Promise<IApiOrder>;
-//}
-// ПЕРЕРАБОТАННЫЙ ИНТЕРФЕЙС:
 export interface IApiClient {
     getProductsList: () => Promise<IProductsList>;
     getProduct: (id: string) => Promise<IProduct>;

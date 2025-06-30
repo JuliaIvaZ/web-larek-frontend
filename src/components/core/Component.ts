@@ -45,10 +45,16 @@ export abstract class Component<T> {
     // Установить изображение с алтернативным текстом
     protected setImage(element: HTMLImageElement, src: string, alt?: string) {
         if (element) {
+            console.log(`Setting image: ${src}`); // Добавляем лог
             element.src = src;
             if (alt) {
                 element.alt = alt;
             }
+            // Добавляем обработчики ошибок
+            element.onerror = () => {
+                console.error(`Failed to load image: ${src}`);
+                element.style.display = 'none';
+            };    
         }
     }
 

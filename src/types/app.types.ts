@@ -9,17 +9,17 @@ export interface IProductsList {
 }
 // Приведено
 export interface IProduct {
-    id: ID;                     // id: ID; // сохраняется в preview IProductsList
+    id: ID;                     // сохраняется в preview IProductsList
     title: string;
     description: string;
-    imageUrl: string;
+    image: string;
     category: ProductCategory;
     price: number | null;
 }
 
 // Приведено
 export interface IOrder { // данные, уходящие к серверу для оформления заказа
-    payment: string;        //payment: string;
+    payment: string;      
     email: string;
     phone: string;
     address: string;
@@ -44,8 +44,8 @@ export type ValidationErrors = Partial<Record<keyof IOrderRequest, string>>;
 // Приведено
 export interface IProductModel {
     _items: IProduct[];
-    setItems(products: IProduct[]): void;    //setItems(productArray: IProduct[]): void;
-    getItems(): IProduct[];                  //getItems(): IProduct[];
+    setItems(products: IProduct[]): void;  
+    getItems(): IProduct[];                 
     getProduct(productId: string): IProduct | undefined;
 }
 
@@ -53,7 +53,7 @@ export interface IProductModel {
 export interface ICartModel {
     items: TCartItem[];
     addProduct(product: IProduct): void;
-    removeProduct(productId: string): void;     //deleteProduct(productId: string): void;
+    removeProduct(productId: string): void;   
     clear(): void;
     getCount(): number;
     getTotal(): number;
@@ -92,7 +92,7 @@ export interface IOrderContacts extends IContactsForm {
 
 // Приведено
 export interface ISuccessData {
-    id: ID;                 // id: ID;
+    id: ID;                
     total: number;
 } 
 export type PaymentMethod = 'online' | 'cash';

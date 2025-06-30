@@ -59,6 +59,30 @@ export class ProductCard<T> extends Component<ICard<T>> {
 
     set category(value: string) {
         this.setText(this._category, value);
+        this.setCategoryClass(value); // Добавляем класс при установке категории
+    }
+
+    // Новый метод для установки класса категории
+    protected setCategoryClass(category: string): void {
+        const categoryClass = this.getCategoryClass(category);
+        if (this._category) {
+            // Удаляем все возможные предыдущие классы категории
+            this._category.className = 'card__category';
+            // Добавляем нужный класс
+            this._category.classList.add(categoryClass);
+        }
+    }
+    
+        // Метод для определения класса (можно оставить private)
+    private getCategoryClass(category: string): string {
+        const map: Record<string, string> = {
+            'софт-скил': 'card__category_soft',
+            'хард-скил': 'card__category_hard',
+            'дополнительное': 'card__category_additional',
+            'кнопка': 'card__category_button',
+            'другое': 'card__category_other'
+        };
+        return map[category] || 'card__category_other';
     }
 }
 
