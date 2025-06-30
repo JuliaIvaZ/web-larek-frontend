@@ -18,12 +18,12 @@ export class CartView extends Component<ICartView> {
         this.events = events;
 
         this._basketList = ensureElement<HTMLElement>('.basket__list', this.container);
-        this._totalPrice = ensureElement<HTMLSpanElement>('.basket__price', container);
-        this._buttonOrder = ensureElement<HTMLButtonElement>('.button', container);
+        this._totalPrice = ensureElement<HTMLSpanElement>('.basket__price', this.container);
+        this._buttonOrder = ensureElement<HTMLButtonElement>('.button', this.container);
         
         if (this._buttonOrder) {
             this._buttonOrder.addEventListener('click', () => {
-                events.emit('orderForm:open');
+                this.events.emit('orderForm:open');
             });
         }
         this.items = [];
@@ -36,7 +36,7 @@ export class CartView extends Component<ICartView> {
             this.setDisabled(this._buttonOrder, false);
         } else {
             this._basketList.replaceChildren(createElement<HTMLParagraphElement>('p', {
-                textContent: 'В корзине пока пусто, выберите что-нибудь по душе :)'
+                textContent: 'Корзина пуста'
             }));
             this.setDisabled(this._buttonOrder, true);
         }

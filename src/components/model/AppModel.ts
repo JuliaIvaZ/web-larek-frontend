@@ -40,9 +40,8 @@ export class ProductCard<T> extends Component<ICard<T>> {
         if (value !== null) {
             this.setText(this._price, `${value} синапсов`);
         } else {
-            this.setText(this._price, `0 синапсов`);
+            this.setText(this._price, `Бесценно`);   
         }
-        
     }
 
     set description(value: string) {
@@ -54,6 +53,7 @@ export class ProductCard<T> extends Component<ICard<T>> {
     }
 
     get category(): string {
+        
         return this.container.dataset.category || '';
     }
 
@@ -188,19 +188,19 @@ export class UserModel implements IOrderModel {
         const errors: ValidationErrors = {};
 
         if (!this.order.email) {
-            errors.email = 'Необходимо указать email';
+            errors.email = 'Укажите email';
         }
 
         if (!this.order.phone) {
-            errors.phone = 'Необходимо указать телефон';
+            errors.phone = 'Укажите телефон';
         }
 
         if (!this.order.address) {
-            errors.address = 'Необходимо указать адрес';
+            errors.address = 'Укажите адрес';
         }
 
         if (!this.order.payment) {
-            errors.payment = 'Необходимо указать вид оплаты';
+            errors.payment = 'Укажите вид оплаты';
         }
 
         this.formErrors = errors;
