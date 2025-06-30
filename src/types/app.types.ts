@@ -9,7 +9,7 @@ export interface IProductsList {
 }
 // Приведено
 export interface IProduct {
-    id: string;                     // id: ID; // сохраняется в preview IProductsList
+    id: ID;                     // id: ID; // сохраняется в preview IProductsList
     title: string;
     description: string;
     imageUrl: string;
@@ -92,7 +92,7 @@ export interface IOrderContacts extends IContactsForm {
 
 // Приведено
 export interface ISuccessData {
-    id: string;                 // id: ID;
+    id: ID;                 // id: ID;
     total: number;
 } 
 export type PaymentMethod = 'online' | 'cash';
@@ -117,9 +117,7 @@ export interface IOrderForm {
     errors: string;
 }
 
-export interface ISuccessData {
-    total: number;
-}
+
 
 export interface ICurrentOrder {
     address?: string;

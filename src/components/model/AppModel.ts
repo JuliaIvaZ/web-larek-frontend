@@ -124,7 +124,7 @@ export class CartModel implements ICartModel {
 
 // Приведено
 export class ProductModel implements IProductModel {
-    //     Класс отвечает за хранение карточек товаров.
+    // Класс отвечает за хранение карточек товаров.
     // Конструктор класса принимает экземпляр брокера событий.
     // В полях класса хранятся следующие данные:
     _items: IProduct[] = [];

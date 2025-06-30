@@ -1,8 +1,8 @@
 // components/view/OrderView.ts
-import { IOrderForm } from "../../types/app.types";
-import { ICartView } from "../../types/views.types";
+
+import { ICartView, IModalForm } from "../../types/views.types";
 import { createElement, ensureElement } from "../../utils/utils";
-import { Component } from "../core/Component";
+import { Component, ModalForm } from "../core/Component";
 import { IEvents } from "../core/EventEmitter";
 
 // Приведено
@@ -51,7 +51,7 @@ export class CartView extends Component<ICartView> {
     }
 }
 
-export class OrderView extends Component<IOrderForm> {
+export class OrderView extends Component<IModalForm> {
     constructor(events: IEvents) {
         // Базовый вариант без сложных селекторов
         super(document.querySelector('.order') || document.createElement('div'));

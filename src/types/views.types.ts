@@ -1,8 +1,8 @@
-import { IProduct } from "./app.types";
+import { ID, IProduct } from "./app.types";
 
 // Приведено
 export interface ICard<T> {
-    id: string;                 // id: ID;
+    id: ID;                 // id: ID;
     title: string;
     price: number;
     description?: string;

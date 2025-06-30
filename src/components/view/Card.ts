@@ -51,6 +51,7 @@ interface ICardBasket {
     onClick: (event: MouseEvent) => void;
 }
 type TBasketCardType = Pick<IProduct, 'id' | 'title'| 'price'>
+
 // Приведено
 export class CardForBasket extends ProductCard<TBasketCardType> {
     protected _index: HTMLSpanElement;
