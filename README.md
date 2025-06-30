@@ -236,20 +236,19 @@ ICheckoutViewStep2 - управляет отображением 2 шага оф
 
 *Конструктор:*
 
-- apiClient: ApiClient - клиент для работы с API
-- eventEmitter: EventEmitter - брокер событий
+- events: IEvents - брокер событий
 
 *Поля:*
 
-- products: Product[] - массив товаров
-- currentProduct: Product | null - текущий выбранный товар
-- isLoading: boolean - флаг загрузки данных
+- _items: IProdect[] - массив товаров
+- preview: string | null - ID текущего товара
 
 *Методы:*
 
-- loadProducts(): Promise<void> - загружает товары с API
-- getProductById(id: string): Product | undefined - возвращает товар по ID
-- setCurrentProduct(id: string): void - устанавливает текущий товар
+- setItems(productArray: IProduct[]) - загрузка массива товаров
+- getItems(): IProduct[] - получение всех товаров
+- getProduct(id: string) - получение товара по ID
+- setPreview(item: IProduct) - установка товара для preview
 
 ### 2. Класс CartModel
 
@@ -257,160 +256,200 @@ ICheckoutViewStep2 - управляет отображением 2 шага оф
 
 *Конструктор:*
 
-- eventEmitter: EventEmitter - брокер событий
+- eevents: IEvents - брокер событий
 
 *Поля:*
 
-- items: CartItem[] - массив товаров в корзине
-- totalPrice: number - общая стоимость товаров
+- _items: TCartItem[] - массив товаров в корзине
 
 *Методы:* 
 
-- addItem(product: Product): void - добавляет товар в корзину
-- removeItem(productId: string): void - удаляет товар из корзины
-- clearCart(): void - очищает корзину
-- calculateTotals(): void - пересчитывает итоговые значения
+- addProduct(product: TCartItem) - добавление товара
+- removeProduct(productId: string) - удаление товара
+- clear() - очистка корзины
+- getCount(): number - подсчет количества
+- - getTotal(): number - расчет суммы
+hasProduct(productId: string) - проверка наличия
 
 ### 3. Класс OrderModel
 
-**Назначение:** Оформление заказов
+**Назначение:** Управление данными заказа
 
 *Конструктор:*
 
-- apiClient: ApiClient - клиент для работы с API
-- eventEmitter: EventEmitter - брокер событий
+- order: IOrderRequest - данные заказа
+- events: IEvents - брокер событий
 
 *Поля:*
 
-- deliveryAddress: string - адрес доставки
-- paymentMethod: Online | UponReceipt - способ оплаты
-- custormerContacts: CustomerContacts - контакты покупателя
+- order: IOrderRequest - данные заказа
+- formErrors: ValidationErrors - ошибки валидации
 
 *Методы:*
 
-- createOrder(cart: CartItem[], totalPrice: number): Promise<Order> - создает новый заказ
-- validateDeliveryData(): boolean - проверяет данные доставки
-- validateCustomerDate(): boolean - проверяет контактные данные
+- setOrderField(field, value) - изменение поля
+- validateOrder() - валидация данных
+- initOrder() - сброс данных
 
 ## Слой Представления (View)
 
-### 1. Класс ProductListView
+### 1. Класс Page
 
-**Назначение:** Отображение каталога товаров
+**Назначение:** азовый контейнер приложения
 
 *Конструктор:*
 
-- container: HTMLElement - контейнер для рендеринга
-- eventEmitter: EventEmitter - брокер событий
+- container: HTMLElement
+- events: IEvents
 
 *Элементы:*
 
-- productCards: HTMLElement - элемент разметки, отображающий список товаров
-- cartButton: HTMLElement - кнопка корзины
+- _counter - счетчик корзины
+- _gallery - контейнер каталога
+- _basket - кнопка корзины
 
 *Методы:*
 
-- render(elementsList: HTMLElements[]): void - отрысовывает список товаров
+- set counter() - обновление счетчика
+- set catalog() - рендер каталога
+- set locked() - блокировка прокрутки
   
-### 2. Класс ModalView
+### 2. Класс Сard
 
-**Назначение:** Отображение универсального модального окна
-
-*Конструктор:*
-
-- modalElement: HTMLElement - элемент модального окна
-- eventEmitter: EventEmitter - брокер событий
-
-*Элементы:*
-
-- closeButton: HTMLElement - кнопка закрытия
-
-*Методы:*
-
-- showModal(content: HTMLElement): void - открывает модальное окно
-- hideModal(): void - скрывает модальное окно
-
-### 3. Класс ProductView
-
-**Назначение:** Отображение карточки товара
+**Назначение:** Базовый компонент карточки товара
 
 *Конструктор:*
 
-- eventEmitter: EventEmitter - брокер событий
-
-*Элементы:*
-
-- rootElement: HTMLElement - контейнер карточки товара
-- addToCartButton: HTMLElement - кнопка добавления товара в корзину
+- mcontainer: HTMLElement
 
 *Методы:*
 
-- getContentElement(): HTMLElement - возвращает элемент разметки для передачи в модальное окно
-- render(product: Product) - отрисовывает данные товара
+- ssetText() - установка текста
+- setImage() - установка изображения
+- setDisabled() - блокировка элементов
+- render() - основной рендер
+
+### 3. Класс Modal
+
+**Назначение:** Базовое модальное окно
+
+*Конструктор:*
+
+- container: HTMLElement
+- events: IEvents
+
+*Элементы:*
+
+- _closeButton - кнопка закрытия
+- _content - контейнер содержимого
+
+*Методы:*
+
+- open() - открытие модалки
+- close() - закрытие модалки
+- set content() - установка содержимого
   
-### 4. Класс CartView
+### 4. Класс ModalForm
 
-**Назначение:** Отображение корзины покупок
-
-*Конструктор:*
-
-- eventEmitter: EventEmitter - брокер событий
-
-*Элементы:*
-
-- rootElement: HTMLElement - контейнер корзины
-- itemsList: HTMLElement - список товаров
-- totalElement: HTMLElement - элемент с общей суммой
-- checkoutButton: HTMLElement - кнопка оформления заказа
-
-*Методы:*
-
-- getContentElement(): HTMLElemtnt - возвращает DOM-элемент корзины для передачи в модальное окно
-- render(cartData: CartData): void - отрисовывает корзину
-- toggleCheckoutButton(enable: boolean): void - активирует/деактивирует кнопку оформления
-- totalPrice(): number - считает общую сумму заказа
-
-### 5. Класс CheckoutViewStep1
-
-**Назначение:** Отображение первого шага процесса оформления заказа
+**Назначение:** Базовая форма в модальном окне
 
 *Конструктор:*
 
-- eventEmitter: EventEmitter - брокер событий
+- econtainer: HTMLFormElement
+- events: IEvents
 
 *Элементы:*
 
-- rootElement: HTMLElement - контейнер первого шага оформления заказа
-- deliveryForm: HTMLFormElement - форма доставки
-- paymentForm: HTMLFormElement - форма оплаты
-- nextStepButton: HTMLElement - кнопка следующего шага
+- _errorSpan - поле ошибок
+- _buttonSubmit - кнопка отправки
 
 *Методы:*
 
-- getContentElement(): HTMLElement - возвращает DOM-элемент первого шага оформления заказа для передачи в модальное окно
-- render(): void - отрисовывает первый шаг оформления
+- gset valid() - валидация формы
+- set errors() - отображение ошибок
+- onInputChange() - обработка изменений
 
-### 6. Класс CheckoutViewStep2
+### 5. Класс CartView
 
-**Назначение:** Отображение второго шага процесса оформления заказа
+**Назначение:** Отображение корзины
 
 *Конструктор:*
 
-- eventEmitter: EventEmitter - брокер событий
+- container: HTMLElement
+- events: IEvents
 
 *Элементы:*
 
-- rootElement: HTMLElement - контейнер второго шага оформления заказа
-- emailForm: HTMLFormElement - форма ввода email
-- phoneNumberForm: HTMLFormElement - форма ввода номера телефона
-- submitButton: HTMLElement - кнопка завершения заказа
+- _basketList - список товаров
+- _totalPrice - сумма заказа
+- _buttonOrder - кнопка оформления
 
 *Методы:*
 
-- getContentElement(): HTMLElement - возвращает DOM-элемент первого шага оформления заказа для передачи в модальное окно
-- render(): void - отрисовывает второй шаг оформления
+- set items() - обновление списка
+- set totalPrice() - обновление суммы
+- clear() - очистка корзины
 
+### 6. Класс SuccessView
+
+**Назначение:** Отображение модального окна с уведомлением об успешном заказе
+
+*Конструктор:*
+
+- container: HTMLElement
+
+*Элементы:*
+
+- total - элемент разметки, отображающий сумму заказа
+
+*Методы:*
+
+- set total() - устанавливает стоимость заказа
+
+## Слой API
+
+### Класс ApiService
+
+**Назначение:** Работа с API магазина
+
+*Конструктор:*
+
+- cdn: string - базовый URL CDN
+- baseUrl: string - URL API
+- options: RequestInit - параметры запросов
+
+*Методы:*
+
+- getProductsList() - получение каталога
+- getProduct() - получение товара
+- orderProducts() - оформление заказа
+- convertImagePath() - преобразование URL изображений
+
+
+## Вспомогательные классы
+
+### 1. Класс EventEmitter
+
+**Назначение:** Управление событиями приложения
+
+*Методы:*
+
+- on() - подписка на событие
+- off() - отписка
+- emit() - генерация события
+- trigger() - создание обработчика
+
+### 2. Класс Component
+
+**Назначение:** Базовый компонент UI
+
+*Методы:*
+
+- otoggleClass() - управление классами
+- setText() - установка текста
+- setDisabled() - блокировка элементов
+- render() - базовый рендер
 
 ## Слой Презентера
 
-Презентер будет реализован в основном скрипте приложения и будет координировать взаимодействие между моделями и представлениями через брокер событийÍ
+Презентер будет реализован в основном скрипте приложения и будет координировать взаимодействие между моделями и представлениями через брокер событий
