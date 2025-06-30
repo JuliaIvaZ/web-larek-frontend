@@ -25,7 +25,8 @@ src/
 │    │
 │    ├── core/           # Базовые классы
 │    │   ├── Component.ts
-│    │   └── EventEmitter.ts
+│    │   ├── EventEmitter.ts
+|    |   └── api.ts
 │    │
 │    ├── model/          # Все модели 
 │    │   ├── AppModel.ts   # Product + Cart
@@ -34,6 +35,7 @@ src/
 │    ├── view/           # Компоненты 
 │    │   ├── Card.ts
 │    │   ├── Modal.ts
+│    │   ├── OrderView.ts
 │    │   └── Page.ts
 │    │
 │    └── app.ts          # Инициализация
@@ -71,43 +73,52 @@ yarn build
 
 ### Типы данных приложения
 
+*Вынесенныт тип*
+
+- type ID - ID карточки
+
 *Товар в приложении*
-Product
+IProduct
 
 - id - идентификационный номер товара
 - title - название товара
 - description - описание товара
-- imageURL - ссылка на картинку товара
+- image - ссылка на картинку товара
 - category - категория товара
-- price - цена
+- price - цена (null для "бесценных" товаров)
+
+*Список карточек товаров*
+IProductList
+
+- _items - массив товаров IProduct
 
 *Категории товаров*
 ProductCategory - может принимать значения 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
 
 *Элемент корзины*
-CartItem
+TCartItem
 
 - product - собственно товар
 - totalPrice - суммарная стоимость товаров в корзине
 
-*Состояние корзины*
-СartData
+*Данные корзины*
+IСartData
 
-- items
--  totalPrice
--  totalCount
+-  items - массив товаров в корзине
+-  totalPrice - общая сумма заказа
+-  totalCount - количество товаров
   
 *Способы оплаты*
 PaymentMethod - может принимать только два значения 'online' | 'then'
 
 *Контакты покупателя*
-CustomerContacts - так как поля обязательные, валидация проверяется в OrderModel
+ICustomerContacts - так как поля обязательные, валидация проверяется в OrderModel
 
 - email
 - phone
 
 *Оформленный заказ*
-Order - Создается в OrderModel при оформлении, отправляется на сервер (преобразуется в ApiOrder), обратно получаем id заказа
+IOrder - Создается в OrderModel при оформлении, отправляется на сервер (преобразуется в ApiOrder), обратно получаем id заказа
 
 - id
 - item

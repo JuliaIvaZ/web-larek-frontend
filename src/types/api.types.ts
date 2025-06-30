@@ -10,34 +10,8 @@ export interface IApiProduct {
     price: number | null;
 }
 
-export interface IApiCartItem {
-    productId: string;
-    priceSnapshot: number;
-}
-
-export interface IApiOrder {
-    id: string;
-    items: string[];
-    total: number;
-    address: string;
-    payment: string;
-    email: string;
-    phone: string;
-    status: string;
-}
-
-export interface IApiSuccess {
-    id: string;
-    total: number;
-}
-
 export interface IApiClient {
     getProductsList: () => Promise<IProductsList>;
     getProduct: (id: string) => Promise<IProduct>;
     orderProducts: (order: IOrder) => Promise<ISuccessData>;
-}
-
-export interface IApiProductList {
-    total: number;
-    items: IApiProduct[];
 }

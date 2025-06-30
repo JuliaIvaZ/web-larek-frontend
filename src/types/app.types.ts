@@ -1,13 +1,11 @@
-import { IApiClient, IApiProduct } from "./api.types";
 
 export type ID = string;
 
 export type ProductCategory = 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
-// Приведено
+
 export interface IProductsList {
     _items: IProduct[];
 }
-// Приведено
 export interface IProduct {
     id: ID;                     // сохраняется в preview IProductsList
     title: string;
@@ -17,7 +15,6 @@ export interface IProduct {
     price: number | null;
 }
 
-// Приведено
 export interface IOrder { // данные, уходящие к серверу для оформления заказа
     payment: string;      
     email: string;
@@ -27,7 +24,6 @@ export interface IOrder { // данные, уходящие к серверу д
     items: string[];
 }
 
-// Приведено
 export interface IOrderRequest { // данные, уходящие к серверу для оформления заказа
     payment: string;
     email: string;
@@ -35,13 +31,10 @@ export interface IOrderRequest { // данные, уходящие к серве
     address: string;
 }
 
-// Приведено
 export type TCartItem = Pick<IProduct, 'id' | 'title' | 'price'>;
 
-// Приведено
 export type ValidationErrors = Partial<Record<keyof IOrderRequest, string>>;
 
-// Приведено
 export interface IProductModel {
     _items: IProduct[];
     setItems(products: IProduct[]): void;  
@@ -49,7 +42,6 @@ export interface IProductModel {
     getProduct(productId: string): IProduct | undefined;
 }
 
-// Приведено
 export interface ICartModel {
     items: TCartItem[];
     addProduct(product: IProduct): void;
@@ -60,7 +52,6 @@ export interface ICartModel {
     hasProduct(productId: string): boolean;
 }
 
-// Приведено
 export interface IOrderModel {
     order: IUserOrder;
     validateOrder(): FormErrors;
@@ -68,59 +59,39 @@ export interface IOrderModel {
     setOrderField(field: keyof IUserOrder, value: string): void;
 }
 
-// Приведено
 export interface IPaymentForm {
     payment: string;
     address: string;
 }
 
-// Приведено
 export interface IContactsForm {
     email: string;
     phone: string;
 }
 
-// Приведено
 export interface IOrderPayment extends IPaymentForm {
     items: string[];
 }
 
-// Приведено
 export interface IOrderContacts extends IContactsForm {
     items: string[];
 }
 
-// Приведено
 export interface ISuccessData {
     id: ID;                
     total: number;
 } 
 export type PaymentMethod = 'online' | 'cash';
+
 export interface ICustomerContacts {
     email: string;
     phone: string;
 }
+
 export type FormErrors = Partial<Record<keyof IUserOrder, string>>;
 interface IUserOrder {
     payment: string;
     email: string;
     phone: string;
     address: string;
-}
-
-export interface IOrderForm {
-    payment: string;
-    address: string;
-    email: string;
-    phone: string;
-    valid: boolean;
-    errors: string;
-}
-
-
-
-export interface ICurrentOrder {
-    address?: string;
-    paymentMethod?: PaymentMethod;
-    customerContacts?: ICustomerContacts;
 }

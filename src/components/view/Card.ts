@@ -1,4 +1,3 @@
-import { Component } from '../core/Component';
 import { IProduct } from '../../types/app.types';
 import { ensureElement } from '../../utils/utils';
 import { ICard } from '../../types/views.types';

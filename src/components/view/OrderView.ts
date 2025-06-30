@@ -2,7 +2,7 @@
 
 import { ICartView, IModalForm } from "../../types/views.types";
 import { createElement, ensureElement } from "../../utils/utils";
-import { Component, ModalForm } from "../core/Component";
+import { Component } from "../core/Component";
 import { IEvents } from "../core/EventEmitter";
 
 // Приведено
