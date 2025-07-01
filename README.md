@@ -291,11 +291,32 @@ hasProduct(productId: string) - проверка наличия
 - validateOrder() - валидация данных
 - initOrder() - сброс данных
 
+### 4. Класс UserModel
+
+**Назначение:** Управление данными покупателя
+
+*Конструктор:*
+
+- order: IPrderRequest - данные заказа
+- events: IEvents - брокер событий
+
+*Поля:*
+
+- order: IOrderRequest - данные покупателя: email, номер телефона, способ оплаты, адрес
+
+*Методы:*
+
+- emitChanges()
+- get orderData()
+- setOrderField()
+- validateOrder()
+- initOrder()
+
 ## Слой Представления (View)
 
 ### 1. Класс Page
 
-**Назначение:** азовый контейнер приложения
+**Назначение:** базовый контейнер приложения
 
 *Конструктор:*
 
@@ -314,22 +335,77 @@ hasProduct(productId: string) - проверка наличия
 - set catalog() - рендер каталога
 - set locked() - блокировка прокрутки
   
-### 2. Класс Сard
+### 2. Класс ProductCard
 
 **Назначение:** Базовый компонент карточки товара
 
 *Конструктор:*
 
-- mcontainer: HTMLElement
+- container: HTMLElement
+
+*Элементы:*
+
+- _id - ID товара
+- _title - название товара
+- _price - цена товара
+- _description - описание товара
+- _image - изображение товара
+- _category - категория товара
+- _button - кнопка
 
 *Методы:*
 
-- ssetText() - установка текста
-- setImage() - установка изображения
-- setDisabled() - блокировка элементов
-- render() - основной рендер
+- set id()
+- get id()
+- set title()
+- set price()
+- set descriprion()
+- set image()
+- get category()
+- set category()
+- setCategoryClass()
+- getCategoryClass()
 
-### 3. Класс Modal
+### 3. Класс Сard
+
+**Назначение:** Карточка товара для отображения на главной странице
+
+*Конструктор:*
+
+- container: HTMLElement
+
+### 4. Класс CardForModal
+
+**Назначение:** Карточка товара для отобржения в модальном окне
+
+*Конструктор:*
+
+- container: HTMLElement
+
+*Методы:*
+
+- render()
+- getContainer()
+
+### 5. Класс CardForModal
+
+**Назначение:** Карточка товара для отображения в корзине
+
+*Конструктор:*
+
+- container: HTMLElement
+
+*Элементы:*
+
+- _index - индекс продукта в корзине
+- _currentIndex = 0
+
+*Методы:*
+
+- set index()
+- get index()
+
+### 6. Класс Modal
 
 **Назначение:** Базовое модальное окно
 
@@ -349,7 +425,7 @@ hasProduct(productId: string) - проверка наличия
 - close() - закрытие модалки
 - set content() - установка содержимого
   
-### 4. Класс ModalForm
+### 7. Класс ModalForm
 
 **Назначение:** Базовая форма в модальном окне
 
@@ -369,7 +445,7 @@ hasProduct(productId: string) - проверка наличия
 - set errors() - отображение ошибок
 - onInputChange() - обработка изменений
 
-### 5. Класс CartView
+### 8. Класс CartView
 
 **Назначение:** Отображение корзины
 
@@ -390,7 +466,7 @@ hasProduct(productId: string) - проверка наличия
 - set totalPrice() - обновление суммы
 - clear() - очистка корзины
 
-### 6. Класс SuccessView
+### 9. Класс SuccessView
 
 **Назначение:** Отображение модального окна с уведомлением об успешном заказе
 

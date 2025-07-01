@@ -1,7 +1,88 @@
-import { IProduct } from '../../types/app.types';
+import { ID, IProduct } from '../../types/app.types';
 import { ensureElement } from '../../utils/utils';
 import { ICard } from '../../types/views.types';
-import { ProductCard } from '../model/AppModel';
+import { Component } from '../core/Component';
+
+export class ProductCard<T> extends Component<ICard<T>> {
+    protected _id: ID;             
+    protected _title: HTMLHeadingElement;
+    protected _price: HTMLSpanElement;
+    protected _description?: HTMLParagraphElement;
+    protected _image?: HTMLImageElement;
+    protected _category?: HTMLSpanElement;
+    protected _button?: HTMLButtonElement;
+
+    constructor(container: HTMLElement) {
+        super(container);
+
+        this._title = ensureElement<HTMLHeadingElement>('.card__title', this.container);
+        this._price = ensureElement<HTMLSpanElement>('.card__price', this.container);
+        this._description = container.querySelector('.card__text');
+        this._image = container.querySelector('.card__image');
+        this._category = container.querySelector('.card__category');
+    }
+
+    set id(value: ID) {
+        this.container.dataset.id = value;
+    }
+
+    get id(): string {
+        return this.container.dataset.id || '';
+    }
+
+    set title(value: string) {
+        this.setText(this._title, value);
+    }
+
+    set price(value: number | null) {
+        if (value !== null) {
+            this.setText(this._price, `${value} синапсов`);
+        } else {
+            this.setText(this._price, `Бесценно`);   
+        }
+    }
+
+    set description(value: string) {
+        this.setText(this._description, value);
+    }
+
+    set image(value: string) {
+        this.setImage(this._image, value, this.title);
+    }
+
+    get category(): string {
+        
+        return this.container.dataset.category || '';
+    }
+
+    set category(value: string) {
+        this.setText(this._category, value);
+        this.setCategoryClass(value); // Добавляем класс при установке категории
+    }
+
+    // Новый метод для установки класса категории
+    protected setCategoryClass(category: string): void {
+        const categoryClass = this.getCategoryClass(category);
+        if (this._category) {
+            // Удаляем все возможные предыдущие классы категории
+            this._category.className = 'card__category';
+            // Добавляем нужный класс
+            this._category.classList.add(categoryClass);
+        }
+    }
+    
+        // Метод для определения класса (можно оставить private)
+    private getCategoryClass(category: string): string {
+        const map: Record<string, string> = {
+            'софт-скил': 'card__category_soft',
+            'хард-скил': 'card__category_hard',
+            'дополнительное': 'card__category_additional',
+            'кнопка': 'card__category_button',
+            'другое': 'card__category_other'
+        };
+        return map[category] || 'card__category_other';
+    }
+}
 
 interface ICardActions {
     onClick: (event: MouseEvent) => void;
@@ -86,3 +167,4 @@ export class CardForBasket extends ProductCard<TBasketCardType> {
         return this._currentIndex;
     }
 }
+

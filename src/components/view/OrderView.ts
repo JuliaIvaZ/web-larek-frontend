@@ -1,11 +1,8 @@
-// components/view/OrderView.ts
-
 import { ICartView, IModalForm } from "../../types/views.types";
 import { createElement, ensureElement } from "../../utils/utils";
 import { Component } from "../core/Component";
 import { IEvents } from "../core/EventEmitter";
 
-// Приведено
 export class CartView extends Component<ICartView> {
     protected _basketList: HTMLElement;
     protected _totalPrice: HTMLSpanElement;
